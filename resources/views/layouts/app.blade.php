@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeData()" x-init="initTheme()" :class="{ 'dark': darkMode }">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeData()" x-init="initTheme()" :class="{ 'dark': darkMode }" style="visibility: hidden;">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Friendship Foundation') }}</title>
+
+        <!-- Instant Dark Mode (prevent flash) -->
+        <script>
+            (function() {
+                const stored = localStorage.getItem('darkMode');
+                const isDark = stored === null ? true : stored === 'true';
+                if (isDark) document.documentElement.classList.add('dark');
+                // Show page after dark mode is applied
+                document.documentElement.style.visibility = 'visible';
+            })();
+        </script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,11 +28,13 @@
         <script>
             function themeData() {
                 return {
-                    darkMode: false,
+                    darkMode: true,
                     sidebarOpen: false,
                     sidebarCollapsed: false,
                     initTheme() {
-                        this.darkMode = localStorage.getItem('darkMode') === 'true';
+                        // Default is dark mode, only switch to light if explicitly set
+                        const stored = localStorage.getItem('darkMode');
+                        this.darkMode = stored === null ? true : stored === 'true';
                         this.sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                     },
                     toggleDarkMode() {
@@ -85,16 +98,24 @@
             .sidebar-collapsed .user-avatar-section > div:last-child { display: none; }
 
             /* Responsive Tables */
-            .table-responsive { width: 100%; }
-            .table-responsive table { width: 100%; table-layout: fixed; }
+            .table-responsive { width: 100%; overflow-x: auto; }
+            .table-responsive table { width: 100%; min-width: 600px; }
             .table-responsive th, .table-responsive td { 
-                overflow: hidden; 
-                text-overflow: ellipsis; 
-                white-space: nowrap; 
                 padding: 0.75rem 0.5rem;
+                white-space: nowrap;
             }
             @media (max-width: 1024px) {
                 .table-responsive th, .table-responsive td { font-size: 0.75rem; padding: 0.5rem 0.25rem; }
+            }
+            
+            /* Fixed Sidebar Layout */
+            .main-content-area {
+                margin-left: 0;
+                transition: margin-left 0.3s ease;
+            }
+            @media (min-width: 1024px) {
+                .main-content-area { margin-left: 18rem; }
+                .main-content-area.sidebar-collapsed-margin { margin-left: 5rem; }
             }
         </style>
     </head>
@@ -114,7 +135,7 @@
 
             <!-- Sidebar -->
             <aside :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'sidebar-collapsed lg:w-20' : 'w-72']" 
-                   class="fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 sidebar-transition lg:translate-x-0 flex flex-col shadow-xl lg:shadow-none">
+                   class="fixed inset-y-0 left-0 z-50 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 sidebar-transition lg:translate-x-0 flex flex-col shadow-xl lg:shadow-none h-screen">
                 
                 <!-- Logo Section -->
                 <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
@@ -280,9 +301,9 @@
                 <!-- User Section at Bottom -->
                 <div class="p-4 border-t border-slate-200 dark:border-slate-700">
                     <div class="user-avatar-section flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </div>
+                        <img src="{{ Auth::user()->avatar_url }}" 
+                             alt="{{ Auth::user()->name }}" 
+                             class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-slate-200 dark:border-slate-600">
                         <div class="user-info flex-1 min-w-0">
                             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ Auth::user()->roles->first()->name ?? 'Member' }}</p>
@@ -292,7 +313,7 @@
             </aside>
 
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col min-h-screen lg:min-w-0">
+            <div class="flex-1 flex flex-col min-h-screen lg:min-w-0 main-content-area" :class="{ 'sidebar-collapsed-margin': sidebarCollapsed }">
                 <!-- Top Header -->
                 <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
                     <!-- Left Side -->
@@ -337,9 +358,9 @@
                         <!-- Profile Dropdown -->
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white text-sm font-semibold">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </div>
+                                <img src="{{ Auth::user()->avatar_url }}" 
+                                     alt="{{ Auth::user()->name }}" 
+                                     class="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600">
                                 <span class="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-200">{{ Auth::user()->name }}</span>
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -354,11 +375,16 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50">
+                                 class="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 overflow-hidden">
                                 
-                                <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ Auth::user()->email }}</p>
+                                <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center space-x-3">
+                                    <img src="{{ Auth::user()->avatar_url }}" 
+                                         alt="{{ Auth::user()->name }}" 
+                                         class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{{ Auth::user()->name }}</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                                    </div>
                                 </div>
 
                                 <a href="{{ route('profile.edit') }}" class="flex items-center space-x-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -422,6 +448,9 @@
                 <footer class="px-4 lg:px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                     <p class="text-center text-sm text-slate-500 dark:text-slate-400">
                         © {{ date('Y') }} Friendship Foundation. Built with ❤️ for friends.
+                    </p>
+                    <p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        Developed by <span class="font-semibold text-indigo-600 dark:text-indigo-400">Mir Javed Jeetu</span> | <a href="tel:01811480222" class="text-indigo-500 hover:text-indigo-700">01811480222</a>
                     </p>
                 </footer>
             </div>

@@ -88,9 +88,7 @@
                                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center">
-                                            <div class="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-medium mr-2">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
+                                            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-8 w-8 rounded-full object-cover mr-2">
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
@@ -116,7 +114,7 @@
                                         {{ $contribution ? '৳' . number_format($contribution->amount, 2) : '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $contribution && $contribution->contribution_date ? $contribution->contribution_date->format('M d, Y') : '-' }}
+                                        {{ $contribution && $contribution->created_at ? $contribution->created_at->format('M d, Y') : '-' }}
                                     </td>
                                     <td class="px-4 py-3">
                                         @if($contribution)

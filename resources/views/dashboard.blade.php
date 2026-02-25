@@ -32,9 +32,7 @@
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div class="mb-4 lg:mb-0">
                     <div class="flex items-center space-x-3 mb-2">
-                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                            <span class="text-xl font-bold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                        </div>
+                        <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-12 h-12 rounded-full object-cover border-2 border-white/30">
                         <div>
                             <p class="text-white/80 text-sm">Welcome back,</p>
                             <h2 class="text-xl font-bold">{{ auth()->user()->name }}</h2>
@@ -51,12 +49,8 @@
                         <p class="text-2xl font-bold">{{ $userTotalMonthsPaid }}</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
-                        <p class="text-white/70 text-xs uppercase tracking-wider">My Share</p>
-                        <p class="text-2xl font-bold">৳{{ number_format($userShare, 0) }}</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3 text-center">
                         <p class="text-white/70 text-xs uppercase tracking-wider">Last Payment</p>
-                        <p class="text-lg font-bold">{{ $userLastContribution ? $userLastContribution->contribution_date?->format('M d') : 'N/A' }}</p>
+                        <p class="text-lg font-bold">{{ $userLastContribution ? $userLastContribution->created_at?->format('M d') : 'N/A' }}</p>
                     </div>
                 </div>
             </div>
@@ -220,9 +214,7 @@
                     @foreach($unpaidMembers as $member)
                     <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center text-white text-xs font-bold">
-                                {{ strtoupper(substr($member->name, 0, 1)) }}
-                            </div>
+                            <img src="{{ $member->avatar_url }}" alt="{{ $member->name }}" class="w-8 h-8 rounded-full object-cover">
                             <span class="text-slate-700 dark:text-slate-300 text-sm font-medium">{{ $member->name }}</span>
                         </div>
                         <span class="text-red-500 text-xs font-bold bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-lg">৳{{ number_format($settings->monthly_contribution_amount, 0) }}</span>
@@ -303,9 +295,7 @@
                     @forelse($recentContributions as $contribution)
                     <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">
-                                {{ strtoupper(substr($contribution->user->name, 0, 1)) }}
-                            </div>
+                            <img src="{{ $contribution->user->avatar_url }}" alt="{{ $contribution->user->name }}" class="w-10 h-10 rounded-full object-cover">
                             <div>
                                 <p class="font-semibold text-slate-800 dark:text-white text-sm">{{ $contribution->user->name }}</p>
                                 <p class="text-xs text-slate-500 dark:text-slate-400">{{ $contribution->month_year }}</p>
@@ -410,16 +400,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-8 text-center py-4 border-t border-slate-200 dark:border-slate-700">
-            <p class="text-slate-500 dark:text-slate-400 text-sm">
-                © {{ date('Y') }} Friendship Foundation. Built with <span class="text-red-500">❤️</span> for friends.
-            </p>
-            <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">
-                Developed by <span class="font-semibold text-indigo-600 dark:text-indigo-400">Mir Javed Jeetu</span> | <a href="tel:01811480222" class="text-indigo-500 hover:text-indigo-700">01811480222</a>
-            </p>
         </div>
     </div>
 

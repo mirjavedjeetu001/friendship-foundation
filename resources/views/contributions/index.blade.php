@@ -59,61 +59,64 @@
             </div>
 
             <!-- Contributions Table -->
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
-                <div class="table-responsive">
-                    <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 min-w-[800px]">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" style="width:18%">Member</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" style="width:10%">Month</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" style="width:10%">Amount</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" style="width:8%">Status</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase hidden lg:table-cell" style="width:14%">Submitted By</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase hidden lg:table-cell" style="width:14%">Approved By</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase hidden md:table-cell" style="width:10%">Date</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" style="width:16%">Actions</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Member</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Month</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Submitted</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Approved</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($contributions as $contribution)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-3 py-3">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $contribution->user->name }}</div>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <img src="{{ $contribution->user->avatar_url }}" alt="{{ $contribution->user->name }}" class="h-8 w-8 rounded-full object-cover mr-2 flex-shrink-0">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $contribution->user->name }}</span>
+                                    </div>
                                 </td>
-                                <td class="px-3 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-gray-100">{{ $contribution->month_year }}</div>
                                     @if($contribution->is_late)
                                         <span class="text-xs text-red-500">Late</span>
                                     @endif
                                 </td>
-                                <td class="px-3 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">৳{{ number_format($contribution->amount, 0) }}</div>
                                 </td>
-                                <td class="px-3 py-3">
-                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
                                         @if($contribution->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
                                         @elseif($contribution->status === 'pending') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
                                         @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 @endif">
                                         {{ ucfirst($contribution->status) }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-3 hidden lg:table-cell">
-                                    <span class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ $contribution->submitter->name }}</span>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $contribution->submitter->name }}</span>
                                 </td>
-                                <td class="px-3 py-3 hidden lg:table-cell">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     @if($contribution->status === 'approved' && $contribution->approver)
-                                        <span class="text-sm text-green-600 dark:text-green-400 truncate">{{ $contribution->approver->name }}</span>
+                                        <span class="text-sm text-green-600 dark:text-green-400">{{ $contribution->approver->name }}</span>
                                     @elseif($contribution->status === 'rejected' && $contribution->approver)
-                                        <span class="text-sm text-red-500 dark:text-red-400 truncate">{{ $contribution->approver->name }}</span>
+                                        <span class="text-sm text-red-500 dark:text-red-400">{{ $contribution->approver->name }}</span>
                                     @else
                                         <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
-                                <td class="px-3 py-3 hidden md:table-cell text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $contribution->created_at->format('M d') }}
                                 </td>
-                                <td class="px-3 py-3">
-                                    <div class="flex items-center gap-1">
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
                                         <a href="{{ route('contributions.show', $contribution) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition">
                                             View
                                         </a>
@@ -132,7 +135,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                     No contributions found.
                                 </td>
                             </tr>

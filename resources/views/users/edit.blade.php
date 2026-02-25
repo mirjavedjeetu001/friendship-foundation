@@ -9,9 +9,43 @@
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                 <div class="p-6">
-                    <form method="POST" action="{{ route('users.update', $user) }}">
+                    <form method="POST" action="{{ route('users.update', $user) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+
+                        <!-- Profile Picture -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Profile Picture (Optional)
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <div id="avatar-preview" class="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
+                                    @if($user->avatar)
+                                        <img src="{{ $user->avatar_url }}" class="w-full h-full object-cover">
+                                    @else
+                                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                        </svg>
+                                    @endif
+                                </div>
+                                <div>
+                                    <input type="file" name="avatar" id="avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)">
+                                    <label for="avatar" class="cursor-pointer px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                        {{ $user->avatar ? 'Change Image' : 'Choose Image' }}
+                                    </label>
+                                    @if($user->avatar)
+                                        <button type="button" onclick="removeAvatar()" class="ml-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-sm hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                                            Remove
+                                        </button>
+                                        <input type="hidden" name="remove_avatar" id="remove_avatar" value="0">
+                                    @endif
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max 2MB, JPG/PNG</p>
+                                </div>
+                            </div>
+                            @error('avatar')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <!-- Name -->
                         <div class="mb-4">
@@ -88,4 +122,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatar-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function removeAvatar() {
+            document.getElementById('remove_avatar').value = '1';
+            document.getElementById('avatar-preview').innerHTML = '<svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>';
+        }
+    </script>
 </x-app-layout>

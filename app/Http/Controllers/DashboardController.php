@@ -79,7 +79,7 @@ class DashboardController extends Controller
 
         $userLastContribution = Contribution::where('user_id', $user->id)
             ->approved()
-            ->latest('contribution_date')
+            ->latest('created_at')
             ->first();
 
         // Calculate user's share

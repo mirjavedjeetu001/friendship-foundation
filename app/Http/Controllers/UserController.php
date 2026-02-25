@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Spatie\Permission\Models\Role;
 
@@ -42,7 +43,13 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', 'exists:roles,name'],
             'is_active' => ['boolean'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
+
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -52,6 +59,7 @@ class UserController extends Controller
             'is_active' => $validated['is_active'] ?? true,
             'joined_date' => now(),
             'email_verified_at' => now(),
+            'avatar' => $avatarPath,
         ]);
 
         $user->assignRole($validated['role']);
@@ -118,13 +126,30 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', 'exists:roles,name'],
             'is_active' => ['boolean'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
+
+        // Handle avatar removal
+        if ($request->input('remove_avatar') == '1' && $user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+            $user->avatar = null;
+        }
+
+        // Handle new avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
 
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
+            'avatar' => $user->avatar,
         ]);
 
         if (!empty($validated['password'])) {

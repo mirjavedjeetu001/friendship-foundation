@@ -113,14 +113,23 @@
                                         <span class="text-lg font-bold text-red-600">৳{{ number_format($settings->monthly_contribution_amount, 2) }}</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        @can('create contributions')
+                                        @if(auth()->user()->can('approve contributions'))
                                         <a href="{{ route('contributions.create', ['user_id' => $member->id]) }}" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
                                             Add Payment
                                         </a>
-                                        @endcan
+                                        @elseif(auth()->id() === $member->id)
+                                        <a href="{{ route('contributions.create') }}" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Pay Now
+                                        </a>
+                                        @else
+                                        <span class="text-xs text-gray-400">-</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach

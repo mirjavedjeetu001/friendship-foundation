@@ -117,4 +117,18 @@ class User extends Authenticatable
             ->where('status', 'pending')
             ->first();
     }
+
+    /**
+     * Get the avatar URL or default
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        
+        // Return UI Avatars URL with user initials
+        $name = urlencode($this->name);
+        return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF&size=128";
+    }
 }

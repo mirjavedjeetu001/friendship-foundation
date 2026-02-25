@@ -18,41 +18,37 @@
                     <div class="space-y-4">
                         @foreach($contributions as $contribution)
                         <div class="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <div class="flex flex-wrap items-start justify-between">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3">
-                                        <div class="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                                            <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-lg">
-                                                {{ substr($contribution->user->name, 0, 1) }}
-                                            </span>
-                                        </div>
+                                        <img src="{{ $contribution->user->avatar_url }}" alt="{{ $contribution->user->name }}" class="h-12 w-12 rounded-full object-cover flex-shrink-0">
                                         <div>
                                             <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ $contribution->user->name }}</h3>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $contribution->month_year }}</p>
                                         </div>
                                     </div>
-                                    <div class="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                                         <span class="font-semibold text-lg text-gray-900 dark:text-gray-100">৳{{ number_format($contribution->amount, 2) }}</span>
                                         @if($contribution->is_late)
                                             <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 rounded text-xs">Late</span>
                                         @endif
                                         @if(!$contribution->is_self_submitted)
-                                            <span class="text-indigo-500">Submitted by {{ $contribution->submitter->name }}</span>
+                                            <span class="text-indigo-500 text-xs">by {{ $contribution->submitter->name }}</span>
                                         @endif
-                                        <span>{{ $contribution->created_at->diffForHumans() }}</span>
+                                        <span class="text-xs">{{ $contribution->created_at->diffForHumans() }}</span>
                                     </div>
                                 </div>
-                                <div class="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
-                                    <a href="{{ route('contributions.show', $contribution) }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-center transition">
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <a href="{{ route('contributions.show', $contribution) }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium transition">
                                         View
                                     </a>
                                     <form action="{{ route('contributions.approve', $contribution) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                        <button type="submit" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition">
                                             Approve
                                         </button>
                                     </form>
-                                    <button onclick="openRejectModal({{ $contribution->id }})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                                    <button onclick="openRejectModal({{ $contribution->id }})" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition">
                                         Reject
                                     </button>
                                 </div>

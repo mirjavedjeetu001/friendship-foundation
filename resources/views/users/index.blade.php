@@ -32,11 +32,7 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                                            <span class="text-indigo-600 dark:text-indigo-400 font-semibold">
-                                                {{ substr($user->name, 0, 1) }}
-                                            </span>
-                                        </div>
+                                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-10 w-10 rounded-full object-cover">
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
