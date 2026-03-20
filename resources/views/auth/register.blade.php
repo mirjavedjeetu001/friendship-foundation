@@ -326,6 +326,53 @@
                 }
             });
         });
+
+        // File size validation
+        const maxFileSize = 2 * 1024 * 1024; // 2MB per file
+        const maxTotalSize = 20 * 1024 * 1024; // 20MB total
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            const fileInputs = this.querySelectorAll('input[type="file"]');
+            let totalSize = 0;
+            let hasLargeFile = false;
+            let largeFileName = '';
+
+            fileInputs.forEach(input => {
+                if (input.files.length > 0) {
+                    const file = input.files[0];
+                    totalSize += file.size;
+                    if (file.size > maxFileSize) {
+                        hasLargeFile = true;
+                        largeFileName = file.name;
+                    }
+                }
+            });
+
+            if (hasLargeFile) {
+                e.preventDefault();
+                alert('File "' + largeFileName + '" is too large. Maximum size per file is 2MB. Please compress or resize your images.');
+                return false;
+            }
+
+            if (totalSize > maxTotalSize) {
+                e.preventDefault();
+                alert('Total file size exceeds 20MB. Please compress or resize your images before uploading.');
+                return false;
+            }
+        });
+
+        // Individual file validation on change
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    if (file.size > maxFileSize) {
+                        alert('File "' + file.name + '" is too large (' + (file.size / 1024 / 1024).toFixed(2) + 'MB). Maximum size is 2MB. Please choose a smaller file.');
+                        this.value = '';
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
