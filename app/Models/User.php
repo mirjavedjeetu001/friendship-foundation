@@ -7,10 +7,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
+
+    /**
+     * Status constants
+     */
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +35,9 @@ class User extends Authenticatable
         'monthly_amount',
         'is_active',
         'joined_date',
+        'status',
+        'approved_at',
+        'approved_by',
     ];
 
     /**
@@ -51,7 +63,48 @@ class User extends Authenticatable
             'joined_date' => 'date',
             'is_active' => 'boolean',
             'monthly_amount' => 'decimal:2',
+            'approved_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Member profile relationship
+     */
+    public function memberProfile(): HasOne
+    {
+        return $this->hasOne(MemberProfile::class);
+    }
+
+    /**
+     * User who approved this member
+     */
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Check if user is pending approval
+     */
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Check if user is approved
+     */
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    }
+
+    /**
+     * Check if user is rejected
+     */
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
     }
 
     /**

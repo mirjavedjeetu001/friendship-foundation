@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Friendship Foundation') }}</title>
+        <title>{{ config('app.name', 'Allied Group') }}</title>
 
         <!-- Instant Dark Mode (prevent flash) -->
         <script>
@@ -120,6 +120,7 @@
         </style>
     </head>
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
+        @php $appSettings = \App\Models\MonthlySetting::getSettings(); @endphp
         <div class="min-h-screen flex">
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" 
@@ -140,12 +141,16 @@
                 <!-- Logo Section -->
                 <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
                     <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30 flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                            </svg>
-                        </div>
-                        <span class="text-lg font-bold gradient-text logo-text">Friendship</span>
+                        @if($appSettings->logo)
+                            <img src="{{ $appSettings->logo_url }}" alt="{{ $appSettings->app_name ?? 'Allied Group' }}" class="w-10 h-10 rounded-xl object-contain flex-shrink-0">
+                        @else
+                            <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30 flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                            </div>
+                        @endif
+                        <span class="text-lg font-bold gradient-text logo-text">{{ $appSettings->app_name ?? 'Allied Group' }}</span>
                     </a>
                     <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,11 +281,24 @@
                             <p class="section-title px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Management</p>
                             
                             @can('view users')
-                            <a href="{{ route('users.index') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('users.*') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Members">
+                            <a href="{{ route('members.index') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('members.index') || request()->routeIs('members.show') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="All Members">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                                 </svg>
-                                <span class="nav-text">Members</span>
+                                <span class="nav-text">All Members</span>
+                            </a>
+                            
+                            <a href="{{ route('members.pending') }}" class="nav-link flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('members.pending') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Pending Approvals">
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    </svg>
+                                    <span class="nav-text">Pending Approvals</span>
+                                </div>
+                                @php $pendingMembers = \App\Models\User::where('status', 'pending')->count(); @endphp
+                                @if($pendingMembers > 0)
+                                <span class="badge-count bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 text-xs font-bold px-2 py-0.5 rounded-full">{{ $pendingMembers }}</span>
+                                @endif
                             </a>
                             @endcan
 
@@ -441,13 +459,13 @@
 
                 <!-- Page Content -->
                 <main class="flex-1 px-4 lg:px-6 pb-6">
-                    {{ $slot }}
+                    {{ $slot ?? '' }}@yield('content')
                 </main>
 
                 <!-- Footer -->
                 <footer class="px-4 lg:px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                     <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-                        © {{ date('Y') }} Friendship Foundation. Built with ❤️ for friends.
+                        © {{ date('Y') }} {{ $appSettings->app_name ?? 'Allied Group' }}. All rights reserved.
                     </p>
                     <p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-1">
                         Developed by <span class="font-semibold text-indigo-600 dark:text-indigo-400">Mir Javed Jeetu</span> | <a href="tel:01811480222" class="text-indigo-500 hover:text-indigo-700">01811480222</a>

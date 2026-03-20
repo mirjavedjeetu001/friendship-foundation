@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
@@ -18,7 +19,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(function () {
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -55,6 +56,32 @@ Route::middleware('auth')->group(function () {
         ->name('users.toggle-status')
         ->middleware('permission:edit users');
     Route::resource('users', UserController::class)
+        ->middleware('permission:view users');
+
+    // Member management routes
+    Route::get('/members', [MemberController::class, 'index'])
+        ->name('members.index')
+        ->middleware('permission:view users');
+    Route::get('/members/pending', [MemberController::class, 'pending'])
+        ->name('members.pending')
+        ->middleware('permission:view users');
+    Route::get('/members/download-all', [MemberController::class, 'downloadAll'])
+        ->name('members.download-all')
+        ->middleware('permission:view users');
+    Route::get('/members/{member}', [MemberController::class, 'show'])
+        ->name('members.show')
+        ->middleware('permission:view users');
+    Route::post('/members/{member}/approve', [MemberController::class, 'approve'])
+        ->name('members.approve')
+        ->middleware('permission:edit users');
+    Route::post('/members/{member}/reject', [MemberController::class, 'reject'])
+        ->name('members.reject')
+        ->middleware('permission:edit users');
+    Route::patch('/members/{member}/role', [MemberController::class, 'updateRole'])
+        ->name('members.update-role')
+        ->middleware('role:super-admin');
+    Route::get('/members/{member}/download', [MemberController::class, 'downloadDocuments'])
+        ->name('members.download')
         ->middleware('permission:view users');
 
     // Settings routes

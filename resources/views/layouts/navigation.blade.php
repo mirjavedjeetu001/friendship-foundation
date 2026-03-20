@@ -1,4 +1,5 @@
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+    @php $appSettings = \App\Models\MonthlySetting::getSettings(); @endphp
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -6,7 +7,10 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center">
-                        <span class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Friendship Foundation</span>
+                        @if($appSettings->logo)
+                            <img src="{{ $appSettings->logo_url }}" alt="{{ $appSettings->app_name ?? 'Allied Group' }}" class="h-8 w-auto mr-2">
+                        @endif
+                        <span class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ $appSettings->app_name ?? 'Allied Group' }}</span>
                     </a>
                 </div>
 

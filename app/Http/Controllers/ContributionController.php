@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentApprovedMail;
 use App\Models\Contribution;
 use App\Models\MonthlySetting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class ContributionController extends Controller
@@ -233,6 +235,14 @@ class ContributionController extends Controller
         // Update bank balance
         $settings = MonthlySetting::getSettings();
         $settings->updateBalance($contribution->amount, 'add');
+
+        // Send payment approved email
+        try {
+            $contribution->load('user');
+            Mail::to($contribution->user->email)->send(new PaymentApprovedMail($contribution->user, $contribution));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send payment approved email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Contribution approved successfully!');
     }

@@ -13,12 +13,13 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         MonthlySetting::create([
+            'app_name' => 'Allied Group',
             'monthly_contribution_amount' => 500.00,
             'due_day' => 10,
             'bank_balance' => 0.00,
             'bank_name' => 'Example Bank',
             'account_number' => '1234567890',
-            'account_holder' => 'Friendship Foundation',
+            'account_holder' => 'Allied Group',
             'is_active' => true,
         ]);
     }

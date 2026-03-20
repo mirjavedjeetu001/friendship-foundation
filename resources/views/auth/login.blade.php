@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - {{ config('app.name', 'Friendship Foundation') }}</title>
+    @php $appSettings = \App\Models\MonthlySetting::getSettings(); @endphp
+    <title>Login - {{ $appSettings->app_name ?? 'Allied Group' }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -18,12 +19,16 @@
         <div class="w-full max-w-md">
             <!-- Logo & Title -->
             <div class="text-center mb-8">
-                <div class="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold text-white">Friendship Foundation</h1>
+                @if($appSettings->logo)
+                    <img src="{{ $appSettings->logo_url }}" alt="{{ $appSettings->app_name ?? 'Allied Group' }}" class="w-14 h-14 rounded-xl object-contain mx-auto mb-4">
+                @else
+                    <div class="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                @endif
+                <h1 class="text-2xl font-bold text-white">{{ $appSettings->app_name ?? 'Allied Group' }}</h1>
                 <p class="text-gray-400 text-sm mt-1">Group Savings Management</p>
             </div>
 
@@ -34,6 +39,12 @@
                 @if (session('status'))
                     <div class="mb-4 p-3 bg-green-900/50 border border-green-700 text-green-400 rounded-lg text-sm">
                         {{ session('status') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-4 p-3 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -90,23 +101,11 @@
                     </button>
                 </form>
 
-                <!-- Demo Section -->
-                <div class="mt-6 pt-5 border-t border-gray-700">
-                    <p class="text-xs text-center text-gray-500 mb-3">Demo Access</p>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="document.getElementById('email').value='admin@friendshipfoundation.com';document.getElementById('password').value='password';"
-                            class="flex-1 py-2 px-3 text-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
-                            Admin
-                        </button>
-                        <button type="button" onclick="document.getElementById('email').value='accountant@friendshipfoundation.com';document.getElementById('password').value='password';"
-                            class="flex-1 py-2 px-3 text-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
-                            Accountant
-                        </button>
-                        <button type="button" onclick="document.getElementById('email').value='rahul@example.com';document.getElementById('password').value='password';"
-                            class="flex-1 py-2 px-3 text-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
-                            Member
-                        </button>
-                    </div>
+                <!-- Register Link -->
+                <div class="mt-6 pt-5 border-t border-gray-700 text-center">
+                    <p class="text-gray-400 text-sm">
+                        Don't have an account? <a href="{{ route('register') }}" class="text-indigo-400 hover:text-indigo-300 font-medium">Register here</a>
+                    </p>
                 </div>
             </div>
 

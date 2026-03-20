@@ -8,6 +8,71 @@
     <div class="py-6">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Branding Settings -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg lg:col-span-2">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Branding</h3>
+                        <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+
+                            <input type="hidden" name="monthly_contribution_amount" value="{{ $settings->monthly_contribution_amount }}">
+                            <input type="hidden" name="due_day" value="{{ $settings->due_day }}">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- App Name -->
+                                <div>
+                                    <label for="app_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Organization Name *
+                                    </label>
+                                    <input type="text" name="app_name" id="app_name" value="{{ old('app_name', $settings->app_name ?? 'Allied Group') }}" required class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">This name will appear throughout the app</p>
+                                </div>
+
+                                <!-- Logo Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Logo (Optional)
+                                    </label>
+                                    <div class="flex items-center gap-4">
+                                        <div id="logo-preview" class="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-500">
+                                            @if($settings->logo)
+                                                <img src="{{ $settings->logo_url }}" class="w-full h-full object-contain">
+                                            @else
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <input type="file" name="logo" id="logo" accept="image/*" class="hidden" onchange="previewLogo(this)">
+                                            <label for="logo" class="cursor-pointer px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                                {{ $settings->logo ? 'Change Logo' : 'Upload Logo' }}
+                                            </label>
+                                            @if($settings->logo)
+                                                <button type="button" onclick="removeLogo()" class="ml-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-sm hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                                                    Remove
+                                                </button>
+                                                <input type="hidden" name="remove_logo" id="remove_logo" value="0">
+                                            @endif
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max 2MB, PNG/JPG/SVG</p>
+                                        </div>
+                                    </div>
+                                    @error('logo')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                                    Save Branding
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- General Settings -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                     <div class="p-6">
@@ -131,4 +196,21 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function previewLogo(input) {
+            const preview = document.getElementById('logo-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-contain">';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function removeLogo() {
+            document.getElementById('remove_logo').value = '1';
+            document.getElementById('logo-preview').innerHTML = '<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+        }
+    </script>
 </x-app-layout>

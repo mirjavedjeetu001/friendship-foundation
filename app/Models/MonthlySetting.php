@@ -10,6 +10,8 @@ class MonthlySetting extends Model
     use HasFactory;
 
     protected $fillable = [
+        'app_name',
+        'logo',
         'monthly_contribution_amount',
         'due_day',
         'bank_balance',
@@ -34,10 +36,22 @@ class MonthlySetting extends Model
     public static function getSettings()
     {
         return self::where('is_active', true)->first() ?? self::create([
+            'app_name' => 'Allied Group',
             'monthly_contribution_amount' => 500,
             'due_day' => 10,
             'bank_balance' => 0,
         ]);
+    }
+
+    /**
+     * Get logo URL
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        if ($this->logo) {
+            return asset('storage/' . $this->logo);
+        }
+        return null;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MonthlySetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -22,6 +23,8 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
+            'app_name' => 'required|string|max:255',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
             'monthly_contribution_amount' => 'required|numeric|min:1',
             'due_day' => 'required|integer|between:1,28',
             'bank_name' => 'nullable|string|max:255',
@@ -30,6 +33,22 @@ class SettingsController extends Controller
         ]);
 
         $settings = MonthlySetting::getSettings();
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            // Delete old logo
+            if ($settings->logo) {
+                Storage::disk('public')->delete($settings->logo);
+            }
+            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+
+        // Handle logo removal
+        if ($request->input('remove_logo') == '1' && $settings->logo) {
+            Storage::disk('public')->delete($settings->logo);
+            $validated['logo'] = null;
+        }
+
         $settings->update($validated);
 
         return back()->with('success', 'Settings updated successfully!');
