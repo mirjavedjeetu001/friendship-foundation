@@ -44,7 +44,7 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'max:2048'], // 2MB max
+            'avatar' => ['required', 'image', 'max:5120'], // 5MB max
         ]);
 
         $user = $request->user();
@@ -153,13 +153,13 @@ class ProfileController extends Controller
             'account_type' => ['nullable', 'in:savings,current'],
             'mobile_banking_provider' => ['nullable', 'string', 'max:50'],
             'mobile_banking_number' => ['nullable', 'string', 'max:20'],
-            'passport_photo' => ['nullable', 'image', 'max:2048'],
-            'nid_front_photo' => ['nullable', 'image', 'max:2048'],
-            'nid_back_photo' => ['nullable', 'image', 'max:2048'],
-            'signature_photo' => ['nullable', 'image', 'max:2048'],
-            'nominee_photo' => ['nullable', 'image', 'max:2048'],
-            'nominee_nid_front_photo' => ['nullable', 'image', 'max:2048'],
-            'nominee_nid_back_photo' => ['nullable', 'image', 'max:2048'],
+            'passport_photo' => ['nullable', 'image', 'max:5120'],
+            'nid_front_photo' => ['nullable', 'image', 'max:5120'],
+            'nid_back_photo' => ['nullable', 'image', 'max:5120'],
+            'signature_photo' => ['nullable', 'image', 'max:5120'],
+            'nominee_photo' => ['nullable', 'image', 'max:5120'],
+            'nominee_nid_front_photo' => ['nullable', 'image', 'max:5120'],
+            'nominee_nid_back_photo' => ['nullable', 'image', 'max:5120'],
         ]);
 
         // Update user

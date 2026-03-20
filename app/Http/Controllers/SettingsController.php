@@ -29,7 +29,7 @@ class SettingsController extends Controller
             // Branding form
             $validated = $request->validate([
                 'app_name' => 'required|string|max:255',
-                'logo' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
+                'logo' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:5120',
             ]);
             
             // Handle logo upload

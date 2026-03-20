@@ -328,7 +328,7 @@
         });
 
         // File size validation
-        const maxFileSize = 2 * 1024 * 1024; // 2MB per file
+        const maxFileSize = 5 * 1024 * 1024; // 5MB per file
         const maxTotalSize = 20 * 1024 * 1024; // 20MB total
 
         document.getElementById('registrationForm').addEventListener('submit', function(e) {

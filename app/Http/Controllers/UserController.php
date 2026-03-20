@@ -43,7 +43,7 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', 'exists:roles,name'],
             'is_active' => ['boolean'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
         ]);
 
         $avatarPath = null;
@@ -126,7 +126,7 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', 'exists:roles,name'],
             'is_active' => ['boolean'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
         ]);
 
         // Handle avatar removal

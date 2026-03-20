@@ -64,20 +64,20 @@ class RegisteredUserController extends Controller
             
             // NID
             'nid_number' => ['required', 'string', 'max:50'],
-            'nid_front_photo' => ['required', 'image', 'max:2048'],
-            'nid_back_photo' => ['required', 'image', 'max:2048'],
+            'nid_front_photo' => ['required', 'image', 'max:5120'],
+            'nid_back_photo' => ['required', 'image', 'max:5120'],
             
             // Passport Photo
-            'passport_photo' => ['required', 'image', 'max:2048'],
+            'passport_photo' => ['required', 'image', 'max:5120'],
             
             // Nominee
             'nominee_name' => ['required', 'string', 'max:255'],
             'nominee_relation' => ['required', 'string', 'max:100'],
             'nominee_phone' => ['required', 'string', 'max:20'],
             'nominee_nid_number' => ['required', 'string', 'max:50'],
-            'nominee_photo' => ['required', 'image', 'max:2048'],
-            'nominee_nid_front_photo' => ['required', 'image', 'max:2048'],
-            'nominee_nid_back_photo' => ['required', 'image', 'max:2048'],
+            'nominee_photo' => ['required', 'image', 'max:5120'],
+            'nominee_nid_front_photo' => ['required', 'image', 'max:5120'],
+            'nominee_nid_back_photo' => ['required', 'image', 'max:5120'],
             'nominee_address' => ['required', 'string', 'max:500'],
             
             // Banking
@@ -91,7 +91,7 @@ class RegisteredUserController extends Controller
             'mobile_banking_number' => ['nullable', 'string', 'max:20'],
             
             // Signature
-            'signature_photo' => ['nullable', 'image', 'max:1024'],
+            'signature_photo' => ['nullable', 'image', 'max:5120'],
         ]);
 
         // Create user with pending status
