@@ -26,6 +26,10 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
     Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Member profile edit routes
+    Route::get('/profile/member', [ProfileController::class, 'memberEdit'])->name('profile.member.edit');
+    Route::put('/profile/member', [ProfileController::class, 'memberUpdate'])->name('profile.member.update');
 
     // Contribution routes
     Route::get('/contributions/pending', [ContributionController::class, 'pending'])

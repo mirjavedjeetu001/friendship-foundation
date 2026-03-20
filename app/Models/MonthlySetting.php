@@ -14,6 +14,8 @@ class MonthlySetting extends Model
         'logo',
         'monthly_contribution_amount',
         'due_day',
+        'start_month',
+        'start_year',
         'bank_balance',
         'bank_name',
         'account_number',
@@ -27,6 +29,8 @@ class MonthlySetting extends Model
             'monthly_contribution_amount' => 'decimal:2',
             'bank_balance' => 'decimal:2',
             'is_active' => 'boolean',
+            'start_month' => 'integer',
+            'start_year' => 'integer',
         ];
     }
 
@@ -39,6 +43,8 @@ class MonthlySetting extends Model
             'app_name' => 'Allied Group',
             'monthly_contribution_amount' => 500,
             'due_day' => 10,
+            'start_month' => 4, // April
+            'start_year' => 2025,
             'bank_balance' => 0,
         ]);
     }

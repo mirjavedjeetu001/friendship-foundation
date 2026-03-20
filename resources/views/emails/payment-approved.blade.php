@@ -16,7 +16,7 @@
 <div class="info-box">
     <p><strong>Payment Details:</strong></p>
     <p><strong>Member:</strong> {{ $user->name }}</p>
-    <p><strong>Month:</strong> {{ $contribution->month->format('F Y') }}</p>
+    <p><strong>Month:</strong> {{ \Carbon\Carbon::create($contribution->year, $contribution->month, 1)->format('F Y') }}</p>
     <p><strong>Amount:</strong> ৳{{ number_format($contribution->amount, 2) }}</p>
     <p><strong>Payment Method:</strong> {{ ucfirst($contribution->payment_method ?? 'Cash') }}</p>
     <p><strong>Transaction ID:</strong> {{ $contribution->transaction_id ?? 'N/A' }}</p>

@@ -22,34 +22,53 @@ class SettingsController extends Controller
      */
     public function update(Request $request)
     {
-        $validated = $request->validate([
-            'app_name' => 'required|string|max:255',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
-            'monthly_contribution_amount' => 'required|numeric|min:1',
-            'due_day' => 'required|integer|between:1,28',
-            'bank_name' => 'nullable|string|max:255',
-            'account_number' => 'nullable|string|max:50',
-            'account_holder' => 'nullable|string|max:255',
-        ]);
-
         $settings = MonthlySetting::getSettings();
-
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo
-            if ($settings->logo) {
-                Storage::disk('public')->delete($settings->logo);
+        
+        // Determine which form was submitted and validate accordingly
+        if ($request->has('app_name') && !$request->has('bank_name')) {
+            // Branding form
+            $validated = $request->validate([
+                'app_name' => 'required|string|max:255',
+                'logo' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
+            ]);
+            
+            // Handle logo upload
+            if ($request->hasFile('logo')) {
+                if ($settings->logo) {
+                    Storage::disk('public')->delete($settings->logo);
+                }
+                $validated['logo'] = $request->file('logo')->store('logos', 'public');
             }
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
-        }
 
-        // Handle logo removal
-        if ($request->input('remove_logo') == '1' && $settings->logo) {
-            Storage::disk('public')->delete($settings->logo);
-            $validated['logo'] = null;
+            // Handle logo removal
+            if ($request->input('remove_logo') == '1' && $settings->logo) {
+                Storage::disk('public')->delete($settings->logo);
+                $validated['logo'] = null;
+            }
+            
+            $settings->update($validated);
+            
+        } elseif ($request->has('monthly_contribution_amount')) {
+            // General Settings form
+            $validated = $request->validate([
+                'monthly_contribution_amount' => 'required|numeric|min:1',
+                'due_day' => 'required|integer|between:1,28',
+                'start_month' => 'nullable|integer|between:1,12',
+                'start_year' => 'nullable|integer|between:2020,2050',
+            ]);
+            
+            $settings->update($validated);
+            
+        } elseif ($request->has('bank_name') || $request->has('account_number') || $request->has('account_holder')) {
+            // Bank Information form
+            $validated = $request->validate([
+                'bank_name' => 'nullable|string|max:255',
+                'account_number' => 'nullable|string|max:50',
+                'account_holder' => 'nullable|string|max:255',
+            ]);
+            
+            $settings->update($validated);
         }
-
-        $settings->update($validated);
 
         return back()->with('success', 'Settings updated successfully!');
     }

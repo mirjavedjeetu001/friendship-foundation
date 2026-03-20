@@ -21,10 +21,10 @@ class ReportController extends Controller
 
         $settings = MonthlySetting::getSettings();
 
-        // Get all members
-        $users = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->get();
+        // Get all members (everyone except super-admin)
+        $users = User::where('email', '!=', 'alliedgroup@gmail.com')
+            ->where('status', 'approved')
+            ->get();
 
         // Get contributions for the month
         $contributions = Contribution::with('user')
@@ -49,10 +49,10 @@ class ReportController extends Controller
 
         $settings = MonthlySetting::getSettings();
 
-        // Get all members
-        $users = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->get();
+        // Get all members (everyone except super-admin)
+        $users = User::where('email', '!=', 'alliedgroup@gmail.com')
+            ->where('status', 'approved')
+            ->get();
 
         // Get all contributions for the year
         $contributions = Contribution::with('user')
@@ -155,10 +155,10 @@ class ReportController extends Controller
 
         $settings = MonthlySetting::getSettings();
 
-        // Get all members
-        $users = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->get();
+        // Get all members (everyone except super-admin)
+        $users = User::where('email', '!=', 'alliedgroup@gmail.com')
+            ->where('status', 'approved')
+            ->get();
 
         // Get user IDs who have paid for this month
         $paidUserIds = Contribution::forMonth($month, $year)
@@ -166,9 +166,10 @@ class ReportController extends Controller
             ->pluck('user_id');
 
         // Get members who haven't paid
-        $dueMembers = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->whereNotIn('id', $paidUserIds)->get();
+        $dueMembers = User::where('email', '!=', 'alliedgroup@gmail.com')
+            ->where('status', 'approved')
+            ->whereNotIn('id', $paidUserIds)
+            ->get();
 
         // Calculate total due
         $totalDue = $dueMembers->count() * $settings->monthly_contribution_amount;

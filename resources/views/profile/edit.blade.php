@@ -7,6 +7,21 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if(Auth::user()->email !== 'alliedgroup@gmail.com')
+            <!-- Edit Full Member Information Link -->
+            <div class="p-4 sm:p-8 bg-gradient-to-r from-indigo-500 to-purple-600 shadow sm:rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div class="text-white">
+                        <h2 class="text-lg font-bold">Edit Your Full Information</h2>
+                        <p class="text-indigo-100 text-sm mt-1">Update your personal details, NID, nominee, banking information and more</p>
+                    </div>
+                    <a href="{{ route('profile.member.edit') }}" class="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition shadow-lg">
+                        Edit Full Profile
+                    </a>
+                </div>
+            </div>
+            @endif
+
             <!-- Avatar Upload Section -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">

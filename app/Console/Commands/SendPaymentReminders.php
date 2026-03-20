@@ -38,10 +38,10 @@ class SendPaymentReminders extends Command
             return Command::SUCCESS;
         }
 
-        // Get all approved members
+        // Get all approved members (everyone except super-admin)
         $members = User::where('status', 'approved')
             ->where('is_active', true)
-            ->whereHas('roles', fn($q) => $q->where('name', 'member'))
+            ->where('email', '!=', 'alliedgroup@gmail.com')
             ->get();
 
         $this->info("Processing {$members->count()} members...");

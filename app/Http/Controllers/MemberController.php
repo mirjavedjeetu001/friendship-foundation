@@ -26,12 +26,12 @@ class MemberController extends Controller
     }
 
     /**
-     * Display all members
+     * Display all members (everyone except super-admin)
      */
     public function index()
     {
         $members = User::with('memberProfile')
-            ->whereHas('roles', fn($q) => $q->where('name', 'member'))
+            ->where('email', '!=', 'alliedgroup@gmail.com')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
@@ -191,7 +191,7 @@ class MemberController extends Controller
     {
         $members = User::with('memberProfile')
             ->where('status', User::STATUS_APPROVED)
-            ->whereHas('roles', fn($q) => $q->where('name', 'member'))
+            ->where('email', '!=', 'alliedgroup@gmail.com')
             ->get();
 
         $zipFileName = 'all_members_' . date('Y-m-d') . '.zip';

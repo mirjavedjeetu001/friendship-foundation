@@ -61,9 +61,10 @@ class ContributionController extends Controller
     public function create()
     {
         $settings = MonthlySetting::getSettings();
-        $users = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->get();
+        // All users are members except super-admin
+        $users = User::where('email', '!=', 'alliedgroup@gmail.com')
+            ->where('status', 'approved')
+            ->get();
 
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;

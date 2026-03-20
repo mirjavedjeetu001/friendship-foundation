@@ -173,15 +173,31 @@ class User extends Authenticatable
 
     /**
      * Get the avatar URL or default
+     * Uses passport photo from member profile if available
      */
     public function getAvatarUrlAttribute(): string
     {
+        // First check if user has custom avatar
         if ($this->avatar) {
             return asset('storage/' . $this->avatar);
+        }
+        
+        // Check if member has a passport photo
+        $profile = $this->memberProfile;
+        if ($profile && $profile->passport_photo) {
+            return asset('storage/' . $profile->passport_photo);
         }
         
         // Return UI Avatars URL with user initials
         $name = urlencode($this->name);
         return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF&size=128";
+    }
+
+    /**
+     * Alias for memberProfile relationship
+     */
+    public function getProfileAttribute()
+    {
+        return $this->memberProfile;
     }
 }

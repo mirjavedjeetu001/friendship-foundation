@@ -16,32 +16,64 @@ class DashboardController extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
         $settings = MonthlySetting::getSettings();
+        
+        // Get start month/year settings
+        $startMonth = $settings->start_month ?? 4;
+        $startYear = $settings->start_year ?? 2025;
+        $startDate = Carbon::create($startYear, $startMonth, 1);
+        $now = Carbon::now();
+        
+        // Check if we're past the program start date
+        $isProgramStarted = $now->greaterThanOrEqualTo($startDate);
 
-        // Stats for dashboard
-        $totalMembers = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->count();
+        // Stats for dashboard - All users are members EXCEPT super-admin
+        $superAdminEmail = 'alliedgroup@gmail.com';
+        $totalMembers = User::where('email', '!=', $superAdminEmail)
+            ->where('status', 'approved')
+            ->count();
 
-        $totalContributions = Contribution::approved()->sum('amount');
-        $totalWithdrawals = Withdrawal::approved()->sum('amount');
+        // Calculate contributions/withdrawals only from start date onwards
+        $totalContributions = Contribution::approved()
+            ->where(function ($q) use ($startMonth, $startYear) {
+                $q->where('year', '>', $startYear)
+                  ->orWhere(function ($q2) use ($startMonth, $startYear) {
+                      $q2->where('year', '=', $startYear)
+                         ->where('month', '>=', $startMonth);
+                  });
+            })
+            ->sum('amount');
+            
+        $totalWithdrawals = Withdrawal::approved()
+            ->where('withdrawal_date', '>=', $startDate)
+            ->sum('amount');
+            
         $currentBalance = $totalContributions - $totalWithdrawals;
 
-        // Current month stats
-        $currentMonthContributions = Contribution::forMonth($currentMonth, $currentYear)
-            ->approved()
-            ->sum('amount');
+        // Current month stats (only if program has started)
+        $currentMonthContributions = 0;
+        $pendingContributions = 0;
+        $unpaidMembers = collect();
+        $paidUserIds = collect();
+        
+        if ($isProgramStarted) {
+            $currentMonthContributions = Contribution::forMonth($currentMonth, $currentYear)
+                ->approved()
+                ->sum('amount');
 
-        $pendingContributions = Contribution::pending()->count();
+            $pendingContributions = Contribution::pending()->count();
+
+            // Members who haven't paid this month
+            $paidUserIds = Contribution::forMonth($currentMonth, $currentYear)
+                ->approved()
+                ->pluck('user_id');
+
+            $unpaidMembers = User::where('email', '!=', $superAdminEmail)
+              ->where('status', 'approved')
+              ->whereNotIn('id', $paidUserIds)
+              ->get();
+        }
+        
         $pendingWithdrawals = Withdrawal::pending()->count();
-
-        // Members who haven't paid this month
-        $paidUserIds = Contribution::forMonth($currentMonth, $currentYear)
-            ->approved()
-            ->pluck('user_id');
-
-        $unpaidMembers = User::whereHas('roles', function ($q) {
-            $q->where('name', 'member');
-        })->whereNotIn('id', $paidUserIds)->get();
 
         // Recent activities
         $recentContributions = Contribution::with(['user', 'submitter'])
@@ -59,7 +91,8 @@ class DashboardController extends Controller
         $isDue = false;
         $dayOfMonth = Carbon::now()->day;
 
-        if ($dayOfMonth > $settings->due_day) {
+        // Only check dues if program has started
+        if ($isProgramStarted && $dayOfMonth > $settings->due_day) {
             $hasPaid = Contribution::where('user_id', $user->id)
                 ->forMonth($currentMonth, $currentYear)
                 ->whereIn('status', ['approved', 'pending'])
@@ -133,7 +166,10 @@ class DashboardController extends Controller
             'chartContributions',
             'chartWithdrawals',
             'paidThisMonth',
-            'unpaidThisMonth'
+            'unpaidThisMonth',
+            'isProgramStarted',
+            'startMonth',
+            'startYear'
         ));
     }
 }

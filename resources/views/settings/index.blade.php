@@ -16,9 +16,6 @@
                             @csrf
                             @method('PUT')
 
-                            <input type="hidden" name="monthly_contribution_amount" value="{{ $settings->monthly_contribution_amount }}">
-                            <input type="hidden" name="due_day" value="{{ $settings->due_day }}">
-
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- App Name -->
                                 <div>
@@ -103,6 +100,29 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Payments after this day will be marked as late</p>
                             </div>
 
+                            <!-- Start Month -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Program Start Date *
+                                </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <select name="start_month" required class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                        @php
+                                            $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                                        @endphp
+                                        @foreach($months as $index => $month)
+                                            <option value="{{ $index + 1 }}" {{ ($settings->start_month ?? 4) == $index + 1 ? 'selected' : '' }}>{{ $month }}</option>
+                                        @endforeach
+                                    </select>
+                                    <select name="start_year" required class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                        @for($y = 2024; $y <= 2030; $y++)
+                                            <option value="{{ $y }}" {{ ($settings->start_year ?? 2025) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Months before this will not be shown as due</p>
+                            </div>
+
                             <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
                                 Save Settings
                             </button>
@@ -117,9 +137,6 @@
                         <form method="POST" action="{{ route('settings.update') }}">
                             @csrf
                             @method('PUT')
-
-                            <input type="hidden" name="monthly_contribution_amount" value="{{ $settings->monthly_contribution_amount }}">
-                            <input type="hidden" name="due_day" value="{{ $settings->due_day }}">
 
                             <!-- Bank Name -->
                             <div class="mb-4">

@@ -13,7 +13,7 @@
     <p><strong>Registration Details:</strong></p>
     <p><strong>Name:</strong> {{ $user->name }}</p>
     <p><strong>Email:</strong> {{ $user->email }}</p>
-    <p><strong>Submitted:</strong> {{ $user->created_at->format('d M Y, h:i A') }}</p>
+    <p><strong>Submitted:</strong> {{ $user->created_at ? $user->created_at->format('d M Y, h:i A') : now()->format('d M Y, h:i A') }}</p>
     <p><strong>Status:</strong> <span style="color: #f59e0b; font-weight: 600;">Pending Approval</span></p>
 </div>
 

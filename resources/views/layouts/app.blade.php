@@ -7,6 +7,14 @@
 
         <title>{{ config('app.name', 'Allied Group') }}</title>
 
+        <!-- Favicon -->
+        @if($appSettings->logo)
+            <link rel="icon" type="image/png" href="{{ $appSettings->logo_url }}">
+            <link rel="apple-touch-icon" href="{{ $appSettings->logo_url }}">
+        @else
+            <link rel="icon" href="{{ asset('favicon.ico') }}">
+        @endif
+
         <!-- Instant Dark Mode (prevent flash) -->
         <script>
             (function() {
@@ -311,6 +319,15 @@
                                 <span class="nav-text">Settings</span>
                             </a>
                             @endcan
+                            
+                            @role('super-admin')
+                            <a href="{{ route('users.index') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('users.*') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Manage Users">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="nav-text">Manage Users</span>
+                            </a>
+                            @endrole
                         </div>
                         @endif
                     </div>
@@ -411,6 +428,15 @@
                                     </svg>
                                     <span>Profile Settings</span>
                                 </a>
+                                
+                                @if(Auth::user()->email !== 'alliedgroup@gmail.com')
+                                <a href="{{ route('profile.member.edit') }}" class="flex items-center space-x-3 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span>Edit My Information</span>
+                                </a>
+                                @endif
 
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf

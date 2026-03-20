@@ -201,6 +201,7 @@
 
             <!-- Unpaid Members This Month -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+                @if($isProgramStarted)
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="text-lg font-bold text-slate-800 dark:text-white">Unpaid - {{ date('M Y') }}</h3>
                     <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -229,6 +230,25 @@
                         </svg>
                     </div>
                     <p class="text-emerald-600 dark:text-emerald-400 font-semibold">All members have paid!</p>
+                </div>
+                @endif
+                @else
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Program Status</h3>
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-blue-600 dark:text-blue-400 font-semibold">Starting {{ \Carbon\Carbon::create($startYear, $startMonth, 1)->format('F Y') }}</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Contributions will begin soon</p>
                 </div>
                 @endif
             </div>

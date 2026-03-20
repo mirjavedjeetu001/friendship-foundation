@@ -94,8 +94,15 @@
     </style>
 </head>
 <body>
+    @php
+        $appSettings = \App\Models\MonthlySetting::getSettings();
+        $logoUrl = $appSettings->logo ? url('storage/' . $appSettings->logo) : null;
+    @endphp
     <div class="email-wrapper">
         <div class="header">
+            @if($logoUrl)
+                <img src="{{ $logoUrl }}" alt="{{ config('app.name', 'Allied Group') }}" style="max-height: 60px; max-width: 120px; margin-bottom: 10px;">
+            @endif
             <h1>{{ config('app.name', 'Allied Group') }}</h1>
         </div>
         <div class="content">
