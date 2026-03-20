@@ -54,20 +54,9 @@ class RoleSeeder extends Seeder
         $superAdmin = Role::create(['name' => 'super-admin']);
         $superAdmin->givePermissionTo(Permission::all());
 
-        // Admin - can manage users and view everything
+        // Admin - has all permissions like super-admin
         $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo([
-            'view users',
-            'create users',
-            'edit users',
-            'view contributions',
-            'create contributions',
-            'create contributions for others',
-            'view withdrawals',
-            'create withdrawals',
-            'view reports',
-            'manage settings',
-        ]);
+        $admin->givePermissionTo(Permission::all());
 
         // Accountant - can approve/reject contributions and withdrawals
         $accountant = Role::create(['name' => 'accountant']);

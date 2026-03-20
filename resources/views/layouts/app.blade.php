@@ -320,14 +320,14 @@
                             </a>
                             @endcan
                             
-                            @role('super-admin')
+                            @can('view users')
                             <a href="{{ route('users.index') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('users.*') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Manage Users">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 <span class="nav-text">Manage Users</span>
                             </a>
-                            @endrole
+                            @endcan
                         </div>
                         @endif
                     </div>
