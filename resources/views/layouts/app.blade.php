@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeData()" x-init="initTheme()" :class="{ 'dark': darkMode }" style="visibility: hidden;">
+    @php $appSettings = \App\Models\MonthlySetting::getSettings(); @endphp
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -128,7 +129,6 @@
         </style>
     </head>
     <body class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
-        @php $appSettings = \App\Models\MonthlySetting::getSettings(); @endphp
         <div class="min-h-screen flex">
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" 

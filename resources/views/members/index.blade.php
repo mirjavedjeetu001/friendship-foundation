@@ -4,12 +4,12 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">All Members</h1>
             <p class="text-gray-400 text-sm mt-1">Manage all registered members</p>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap gap-2">
             <a href="{{ route('members.pending') }}" class="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-500 transition">Pending Approvals</a>
             <a href="{{ route('members.download-all') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-500 transition">Download All Data</a>
         </div>
@@ -20,7 +20,8 @@
     @endif
 
     <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-        <table class="w-full">
+        <div class="overflow-x-auto">
+        <table class="w-full min-w-[800px]">
             <thead class="bg-gray-700/50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Member</th>
@@ -91,6 +92,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <div class="mt-4">{{ $members->links() }}</div>

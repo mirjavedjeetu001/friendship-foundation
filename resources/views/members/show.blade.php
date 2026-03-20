@@ -4,28 +4,28 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center space-x-4">
-            <a href="{{ url()->previous() }}" class="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition">
+            <a href="{{ url()->previous() }}" class="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition flex-shrink-0">
                 <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
-            <div>
-                <h1 class="text-2xl font-bold text-white">{{ $member->name }}</h1>
+            <div class="min-w-0">
+                <h1 class="text-xl sm:text-2xl font-bold text-white truncate">{{ $member->name }}</h1>
                 <p class="text-gray-400 text-sm">Member Profile</p>
             </div>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap gap-2">
             @if($member->status === 'pending')
                 <form action="{{ route('members.approve', $member) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 transition">Approve</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 transition text-sm">Approve</button>
                 </form>
                 <form action="{{ route('members.reject', $member) }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition">Reject</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition text-sm">Reject</button>
                 </form>
             @endif
-            <a href="{{ route('members.download', $member) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition">Download Documents</a>
+            <a href="{{ route('members.download', $member) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition text-sm">Download Docs</a>
         </div>
     </div>
 

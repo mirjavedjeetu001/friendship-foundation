@@ -74,13 +74,15 @@ class RoleSeeder extends Seeder
         $accountant->givePermissionTo([
             'view users',
             'view contributions',
+            'create contributions',
+            'create contributions for others',
             'approve contributions',
             'reject contributions',
             'view withdrawals',
+            'create withdrawals',
             'approve withdrawals',
             'reject withdrawals',
             'view reports',
-            'manage settings',
         ]);
 
         // Member - basic member permissions
