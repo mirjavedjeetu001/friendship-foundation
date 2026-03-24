@@ -32,7 +32,29 @@
             </div>
 
             <!-- Registration Card -->
-            <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8" x-data="{ step: 1, sameAddress: false }">
+            @php
+                $initialStep = 1;
+                if ($errors->any()) {
+                    $errorKeys = $errors->keys();
+                    // Step 5: Account fields
+                    $step5Fields = ['email', 'password', 'password_confirmation'];
+                    // Step 4: Banking fields
+                    $step4Fields = ['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number'];
+                    // Step 3: Nominee fields
+                    $step3Fields = ['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address'];
+                    // Step 2: Identity fields
+                    $step2Fields = ['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo'];
+                    
+                    foreach ($errorKeys as $key) {
+                        if (in_array($key, $step5Fields)) { $initialStep = 5; break; }
+                        if (in_array($key, $step4Fields)) { $initialStep = 4; break; }
+                        if (in_array($key, $step3Fields)) { $initialStep = 3; break; }
+                        if (in_array($key, $step2Fields)) { $initialStep = 2; break; }
+                        // Default is step 1 (Personal fields)
+                    }
+                }
+            @endphp
+            <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8" x-data="{ step: {{ $initialStep }}, sameAddress: false }">
                 <!-- Progress Steps -->
                 <div class="flex justify-between mb-8 relative">
                     <div class="absolute top-5 left-0 right-0 h-0.5 bg-gray-700">
@@ -126,15 +148,15 @@
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-300 mb-1.5">Present Address *</label>
-                                <textarea name="present_address" rows="2" required class="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-white resize-none">{{ old('present_address') }}</textarea>
+                                <textarea name="present_address" x-ref="presentAddress" @input="if(sameAddress) { $refs.permanentAddress.value = $el.value }" rows="2" required class="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-white resize-none">{{ old('present_address') }}</textarea>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="flex items-center text-sm text-gray-400 mb-2">
-                                    <input type="checkbox" x-model="sameAddress" class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500 mr-2">
+                                    <input type="checkbox" x-model="sameAddress" @change="if(sameAddress) { $refs.permanentAddress.value = $refs.presentAddress.value }" class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500 mr-2">
                                     Same as present address
                                 </label>
                                 <label class="block text-sm font-medium text-gray-300 mb-1.5">Permanent Address *</label>
-                                <textarea name="permanent_address" rows="2" required :disabled="sameAddress" class="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-white resize-none disabled:opacity-50">{{ old('permanent_address') }}</textarea>
+                                <textarea name="permanent_address" x-ref="permanentAddress" rows="2" required :readonly="sameAddress" :class="sameAddress ? 'opacity-50 cursor-not-allowed' : ''" class="w-full px-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-white resize-none">{{ old('permanent_address') }}</textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-1.5">Emergency Contact Name *</label>
@@ -318,20 +340,17 @@
         </div>
     </div>
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.effect(() => {
-                const el = document.querySelector('[x-data]');
-                if (el && Alpine.$data(el).sameAddress) {
-                    document.querySelector('[name="permanent_address"]').value = document.querySelector('[name="present_address"]').value;
-                }
-            });
-        });
-
         // File size validation
         const maxFileSize = 5 * 1024 * 1024; // 5MB per file
         const maxTotalSize = 20 * 1024 * 1024; // 20MB total
 
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            // Copy present address to permanent if sameAddress is checked
+            const el = document.querySelector('[x-data]');
+            if (el && Alpine.$data(el).sameAddress) {
+                document.querySelector('[name="permanent_address"]').value = document.querySelector('[name="present_address"]').value;
+            }
+
             const fileInputs = this.querySelectorAll('input[type="file"]');
             let totalSize = 0;
             let hasLargeFile = false;
