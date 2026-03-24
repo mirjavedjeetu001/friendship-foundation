@@ -106,6 +106,11 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $profile = $user->profile;
+        
+        // If no profile exists, create an empty one for the form
+        if (!$profile) {
+            $profile = new \App\Models\MemberProfile();
+        }
 
         return view('profile.member-profile', [
             'user' => $user,
