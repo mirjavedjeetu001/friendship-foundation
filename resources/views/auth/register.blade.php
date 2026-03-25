@@ -36,48 +36,91 @@
                 $initialStep = 1;
                 if ($errors->any()) {
                     $errorKeys = $errors->keys();
-                    // Step 5: Account fields
-                    $step5Fields = ['email', 'password', 'password_confirmation'];
-                    // Step 4: Banking fields
-                    $step4Fields = ['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number'];
-                    // Step 3: Nominee fields
-                    $step3Fields = ['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address'];
-                    // Step 2: Identity fields
-                    $step2Fields = ['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo'];
                     
+                    // Define all fields for each step
+                    $step1Fields = ['name', 'full_name_bangla', 'father_name', 'mother_name', 'date_of_birth', 'gender', 'blood_group', 'phone', 'phone_secondary', 'occupation', 'designation', 'organization', 'present_address', 'permanent_address', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation'];
+                    $step2Fields = ['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo'];
+                    $step3Fields = ['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address'];
+                    $step4Fields = ['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number'];
+                    $step5Fields = ['email', 'password', 'password_confirmation'];
+                    
+                    // Find the FIRST (lowest) step that has an error
                     foreach ($errorKeys as $key) {
-                        if (in_array($key, $step5Fields)) { $initialStep = 5; break; }
-                        if (in_array($key, $step4Fields)) { $initialStep = 4; break; }
-                        if (in_array($key, $step3Fields)) { $initialStep = 3; break; }
-                        if (in_array($key, $step2Fields)) { $initialStep = 2; break; }
-                        // Default is step 1 (Personal fields)
+                        if (in_array($key, $step1Fields)) { $initialStep = 1; break; }
+                    }
+                    if ($initialStep == 1) {
+                        // Check if error is actually in step 1 or we need to look further
+                        $hasStep1Error = false;
+                        foreach ($errorKeys as $key) {
+                            if (in_array($key, $step1Fields)) { $hasStep1Error = true; break; }
+                        }
+                        if (!$hasStep1Error) {
+                            // No step 1 error, check step 2
+                            foreach ($errorKeys as $key) {
+                                if (in_array($key, $step2Fields)) { $initialStep = 2; break; }
+                            }
+                        }
+                    }
+                    if ($initialStep == 1 && !in_array($errorKeys[0] ?? '', $step1Fields)) {
+                        foreach ($errorKeys as $key) {
+                            if (in_array($key, $step2Fields)) { $initialStep = 2; break; }
+                            if (in_array($key, $step3Fields)) { $initialStep = 3; break; }
+                            if (in_array($key, $step4Fields)) { $initialStep = 4; break; }
+                            if (in_array($key, $step5Fields)) { $initialStep = 5; break; }
+                        }
                     }
                 }
+                
+                // Group errors by step for display
+                $stepErrors = [
+                    1 => $errors->only(['name', 'full_name_bangla', 'father_name', 'mother_name', 'date_of_birth', 'gender', 'blood_group', 'phone', 'phone_secondary', 'occupation', 'designation', 'organization', 'present_address', 'permanent_address', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation']),
+                    2 => $errors->only(['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo']),
+                    3 => $errors->only(['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address']),
+                    4 => $errors->only(['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number']),
+                    5 => $errors->only(['email', 'password', 'password_confirmation']),
+                ];
             @endphp
             <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8" x-data="{ step: {{ $initialStep }}, sameAddress: false }">
-                <!-- Progress Steps -->
+                <!-- Progress Steps with error indicators -->
                 <div class="flex justify-between mb-8 relative">
                     <div class="absolute top-5 left-0 right-0 h-0.5 bg-gray-700">
                         <div class="h-full bg-indigo-600 transition-all duration-300" :style="'width: ' + ((step - 1) * 25) + '%'"></div>
                     </div>
-                    <template x-for="(label, index) in ['Personal', 'Identity', 'Nominee', 'Banking', 'Account']" :key="index">
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all"
-                                :class="step > index + 1 ? 'bg-indigo-600 text-white' : (step === index + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-400')">
-                                <span x-text="index + 1"></span>
+                    @php $stepLabels = ['Personal', 'Identity', 'Nominee', 'Banking', 'Account']; @endphp
+                    @foreach($stepLabels as $index => $label)
+                        @php $stepNum = $index + 1; @endphp
+                        <div class="relative z-10 flex flex-col items-center cursor-pointer" @click="step = {{ $stepNum }}">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all relative
+                                {{ count($stepErrors[$stepNum] ?? []) > 0 ? 'ring-2 ring-red-500' : '' }}"
+                                :class="step > {{ $stepNum }} ? 'bg-indigo-600 text-white' : (step === {{ $stepNum }} ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-400')">
+                                <span>{{ $stepNum }}</span>
+                                @if(count($stepErrors[$stepNum] ?? []) > 0)
+                                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                                @endif
                             </div>
-                            <span class="text-xs mt-2 text-gray-400 hidden sm:block" x-text="label"></span>
+                            <span class="text-xs mt-2 {{ count($stepErrors[$stepNum] ?? []) > 0 ? 'text-red-400' : 'text-gray-400' }} hidden sm:block">{{ $label }}</span>
                         </div>
-                    </template>
+                    @endforeach
                 </div>
 
-                @if ($errors->any())
-                    <div class="mb-6 p-4 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
-                        <ul class="list-disc list-inside space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                <!-- Step-specific errors -->
+                @for($i = 1; $i <= 5; $i++)
+                    @if(count($stepErrors[$i] ?? []) > 0)
+                        <div x-show="step === {{ $i }}" class="mb-6 p-4 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
+                            <p class="font-medium mb-2">অনুগ্রহ করে নিচের তথ্যগুলো ঠিক করুন:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                @foreach($stepErrors[$i]->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                @endfor
+
+                <!-- Warning about file re-upload -->
+                @if($errors->any() && ($errors->has('passport_photo') || $errors->has('nid_front_photo') || $errors->has('nid_back_photo') || $errors->has('nominee_photo') || $errors->has('nominee_nid_front_photo') || $errors->has('nominee_nid_back_photo') || $errors->has('signature_photo')))
+                    <div class="mb-6 p-4 bg-yellow-900/50 border border-yellow-700 text-yellow-400 rounded-lg text-sm">
+                        <p>⚠️ ছবিগুলো পুনরায় আপলোড করতে হবে। ব্রাউজার সিকিউরিটির কারণে আগের ছবি সংরক্ষণ করা যায়নি।</p>
                     </div>
                 @endif
 
@@ -325,8 +368,13 @@
                     <div class="flex justify-between mt-8 pt-6 border-t border-gray-700">
                         <button type="button" x-show="step > 1" @click="step--" class="px-6 py-2.5 text-gray-400 hover:text-white transition">← Previous</button>
                         <div x-show="step === 1"></div>
-                        <button type="button" x-show="step < 5" @click="step++" class="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500 transition">Next →</button>
+                        <button type="button" x-show="step < 5" @click="validateAndNext()" class="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500 transition">Next →</button>
                         <button type="submit" x-show="step === 5" class="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-500 transition">Submit Registration</button>
+                    </div>
+                    
+                    <!-- Validation Error Alert -->
+                    <div id="validationAlert" class="hidden mt-4 p-4 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
+                        <p id="validationMessage"></p>
                     </div>
                 </form>
             </div>
@@ -340,6 +388,101 @@
         </div>
     </div>
     <script>
+        // Step validation function
+        function validateAndNext() {
+            const el = document.querySelector('[x-data]');
+            const currentStep = Alpine.$data(el).step;
+            const alertBox = document.getElementById('validationAlert');
+            const alertMsg = document.getElementById('validationMessage');
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Define required fields for each step
+            const requiredFields = {
+                1: [
+                    { name: 'name', label: 'Full Name (English)' },
+                    { name: 'father_name', label: "Father's Name" },
+                    { name: 'mother_name', label: "Mother's Name" },
+                    { name: 'date_of_birth', label: 'Date of Birth' },
+                    { name: 'gender', label: 'Gender' },
+                    { name: 'phone', label: 'Phone Number' },
+                    { name: 'present_address', label: 'Present Address' },
+                    { name: 'permanent_address', label: 'Permanent Address' },
+                    { name: 'emergency_contact_name', label: 'Emergency Contact Name' },
+                    { name: 'emergency_contact_phone', label: 'Emergency Contact Phone' },
+                    { name: 'emergency_contact_relation', label: 'Emergency Contact Relation' }
+                ],
+                2: [
+                    { name: 'nid_number', label: 'NID Number' },
+                    { name: 'nid_front_photo', label: 'NID Front Photo', type: 'file' },
+                    { name: 'nid_back_photo', label: 'NID Back Photo', type: 'file' },
+                    { name: 'passport_photo', label: 'Passport Photo', type: 'file' }
+                ],
+                3: [
+                    { name: 'nominee_name', label: 'Nominee Name' },
+                    { name: 'nominee_relation', label: 'Nominee Relation' },
+                    { name: 'nominee_phone', label: 'Nominee Phone' },
+                    { name: 'nominee_nid_number', label: 'Nominee NID Number' },
+                    { name: 'nominee_photo', label: 'Nominee Photo', type: 'file' },
+                    { name: 'nominee_nid_front_photo', label: 'Nominee NID Front', type: 'file' },
+                    { name: 'nominee_nid_back_photo', label: 'Nominee NID Back', type: 'file' },
+                    { name: 'nominee_address', label: 'Nominee Address' }
+                ],
+                4: [] // Banking is optional
+            };
+            
+            const fieldsToCheck = requiredFields[currentStep] || [];
+            const missingFields = [];
+            
+            fieldsToCheck.forEach(field => {
+                const input = document.querySelector(`[name="${field.name}"]`);
+                if (input) {
+                    if (field.type === 'file') {
+                        if (!input.files || input.files.length === 0) {
+                            missingFields.push(field.label);
+                            input.classList.add('border-red-500');
+                        } else {
+                            input.classList.remove('border-red-500');
+                        }
+                    } else {
+                        const value = input.value.trim();
+                        if (!value) {
+                            missingFields.push(field.label);
+                            input.classList.add('border-red-500');
+                        } else {
+                            input.classList.remove('border-red-500');
+                        }
+                    }
+                }
+            });
+            
+            // Special handling for permanent address when sameAddress is checked
+            if (currentStep === 1 && Alpine.$data(el).sameAddress) {
+                const presentAddr = document.querySelector('[name="present_address"]').value.trim();
+                if (presentAddr) {
+                    document.querySelector('[name="permanent_address"]').value = presentAddr;
+                    const idx = missingFields.indexOf('Permanent Address');
+                    if (idx > -1) missingFields.splice(idx, 1);
+                }
+            }
+            
+            if (missingFields.length > 0) {
+                isValid = false;
+                errorMessage = 'অনুগ্রহ করে নিচের তথ্যগুলো পূরণ করুন: ' + missingFields.join(', ');
+            }
+            
+            if (isValid) {
+                alertBox.classList.add('hidden');
+                Alpine.$data(el).step++;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alertBox.classList.remove('hidden');
+                alertMsg.textContent = errorMessage;
+                alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
         // File size validation
         const maxFileSize = 5 * 1024 * 1024; // 5MB per file
         const maxTotalSize = 20 * 1024 * 1024; // 20MB total
@@ -369,7 +512,7 @@
 
             if (hasLargeFile) {
                 e.preventDefault();
-                alert('File "' + largeFileName + '" is too large. Maximum size per file is 2MB. Please compress or resize your images.');
+                alert('File "' + largeFileName + '" is too large. Maximum size per file is 5MB. Please compress or resize your images.');
                 return false;
             }
 
@@ -386,7 +529,7 @@
                 if (this.files.length > 0) {
                     const file = this.files[0];
                     if (file.size > maxFileSize) {
-                        alert('File "' + file.name + '" is too large (' + (file.size / 1024 / 1024).toFixed(2) + 'MB). Maximum size is 2MB. Please choose a smaller file.');
+                        alert('File "' + file.name + '" is too large (' + (file.size / 1024 / 1024).toFixed(2) + 'MB). Maximum size is 5MB. Please choose a smaller file.');
                         this.value = '';
                     }
                 }
