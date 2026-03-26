@@ -76,6 +76,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Alias for memberProfile (for backward compatibility)
+     */
+    public function profile(): HasOne
+    {
+        return $this->memberProfile();
+    }
+
+    /**
      * User who approved this member
      */
     public function approver(): BelongsTo

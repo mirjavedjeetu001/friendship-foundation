@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class ElectionVote extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'election_id',
+        'position_id',
+        'candidate_id',
+        'voter_id',
+    ];
+
+    public function election()
+    {
+        return $this->belongsTo(Election::class);
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(ElectionPosition::class, 'position_id');
+    }
+
+    public function candidate()
+    {
+        return $this->belongsTo(ElectionCandidate::class, 'candidate_id');
+    }
+
+    public function voter()
+    {
+        return $this->belongsTo(User::class, 'voter_id');
+    }
+}

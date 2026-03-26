@@ -114,7 +114,7 @@
                 @for($i = 1; $i <= 5; $i++)
                     @if(count($stepErrors[$i] ?? []) > 0)
                         <div x-show="step === {{ $i }}" class="mb-6 p-4 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
-                            <p class="font-medium mb-2">অনুগ্রহ করে নিচের তথ্যগুলো ঠিক করুন:</p>
+                            <p class="font-medium mb-2">Please fix the following errors:</p>
                             <ul class="list-disc list-inside space-y-1">
                                 @foreach($stepErrors[$i] as $fieldErrors)
                                     @foreach($fieldErrors as $error)

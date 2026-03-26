@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ElectionController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\OrganizationDocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VotingController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
@@ -105,6 +108,62 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
         Route::get('/yearly', [ReportController::class, 'yearly'])->name('yearly');
         Route::get('/financial', [ReportController::class, 'financial'])->name('financial');
         Route::get('/due', [ReportController::class, 'due'])->name('due');
+    });
+
+    // ========== ELECTION & VOTING ROUTES ==========
+    
+    // Member voting routes (all authenticated members can access)
+    Route::prefix('elections')->name('elections.')->group(function () {
+        Route::get('/', [VotingController::class, 'index'])->name('index');
+        Route::get('/history', [VotingController::class, 'history'])->name('history');
+        Route::get('/committee', [VotingController::class, 'committee'])->name('committee');
+        Route::get('/{election}/vote', [VotingController::class, 'show'])->name('vote');
+        Route::post('/{election}/vote', [VotingController::class, 'vote']);
+        Route::get('/{election}/results', [VotingController::class, 'results'])->name('results');
+        Route::get('/{election}/live', [VotingController::class, 'liveResults'])->name('live');
+    });
+
+    // Admin election management routes
+    Route::prefix('admin/elections')->name('admin.elections.')->middleware('permission:manage settings')->group(function () {
+        Route::get('/', [ElectionController::class, 'index'])->name('index');
+        Route::get('/create', [ElectionController::class, 'create'])->name('create');
+        Route::post('/', [ElectionController::class, 'store'])->name('store');
+        Route::get('/history', [ElectionController::class, 'history'])->name('history');
+        Route::get('/{election}', [ElectionController::class, 'show'])->name('show');
+        Route::get('/{election}/edit', [ElectionController::class, 'edit'])->name('edit');
+        Route::put('/{election}', [ElectionController::class, 'update'])->name('update');
+        Route::delete('/{election}', [ElectionController::class, 'destroy'])->name('destroy');
+        Route::get('/{election}/results', [ElectionController::class, 'results'])->name('results');
+        Route::post('/{election}/start', [ElectionController::class, 'start'])->name('start');
+        Route::post('/{election}/stop', [ElectionController::class, 'stop'])->name('stop');
+        Route::post('/{election}/resume', [ElectionController::class, 'resume'])->name('resume');
+        Route::post('/{election}/end', [ElectionController::class, 'end'])->name('end');
+        Route::post('/{election}/cancel', [ElectionController::class, 'cancel'])->name('cancel');
+        Route::post('/{election}/publish', [ElectionController::class, 'publish'])->name('publish');
+        Route::post('/{election}/unpublish', [ElectionController::class, 'unpublish'])->name('unpublish');
+        Route::post('/{election}/toggle-winner/{candidate}', [ElectionController::class, 'toggleWinner'])->name('toggle-winner');
+        Route::post('/{election}/candidates', [ElectionController::class, 'addCandidate'])->name('add-candidate');
+        Route::delete('/{election}/candidates/{candidate}', [ElectionController::class, 'removeCandidate'])->name('remove-candidate');
+    });
+
+    // ========== DOCUMENT ROUTES ==========
+    
+    // Member document viewing routes
+    Route::prefix('documents')->name('documents.')->group(function () {
+        Route::get('/', [OrganizationDocumentController::class, 'index'])->name('index');
+        Route::get('/type/{type}', [OrganizationDocumentController::class, 'byType'])->name('type');
+        Route::get('/{document}', [OrganizationDocumentController::class, 'show'])->name('show');
+        Route::get('/{document}/download', [OrganizationDocumentController::class, 'download'])->name('download');
+    });
+
+    // Admin document management routes
+    Route::prefix('admin/documents')->name('admin.documents.')->middleware('permission:manage settings')->group(function () {
+        Route::get('/', [OrganizationDocumentController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [OrganizationDocumentController::class, 'create'])->name('create');
+        Route::post('/', [OrganizationDocumentController::class, 'store'])->name('store');
+        Route::get('/{document}/edit', [OrganizationDocumentController::class, 'edit'])->name('edit');
+        Route::put('/{document}', [OrganizationDocumentController::class, 'update'])->name('update');
+        Route::delete('/{document}', [OrganizationDocumentController::class, 'destroy'])->name('destroy');
     });
 });
 

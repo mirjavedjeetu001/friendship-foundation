@@ -94,7 +94,7 @@
                         class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name (বাংলা)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name (Bangla)</label>
                     <input type="text" name="full_name_bangla" value="{{ old('full_name_bangla', $profile->full_name_bangla ?? '') }}"
                         class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-indigo-500">
                 </div>
