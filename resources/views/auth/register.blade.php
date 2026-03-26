@@ -71,14 +71,21 @@
                     }
                 }
                 
-                // Group errors by step for display
-                $stepErrors = [
-                    1 => $errors->only(['name', 'full_name_bangla', 'father_name', 'mother_name', 'date_of_birth', 'gender', 'blood_group', 'phone', 'phone_secondary', 'occupation', 'designation', 'organization', 'present_address', 'permanent_address', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation']),
-                    2 => $errors->only(['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo']),
-                    3 => $errors->only(['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address']),
-                    4 => $errors->only(['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number']),
-                    5 => $errors->only(['email', 'password', 'password_confirmation']),
-                ];
+                // Group errors by step for display (manual filtering since MessageBag doesn't have only())
+                $step1Fields = ['name', 'full_name_bangla', 'father_name', 'mother_name', 'date_of_birth', 'gender', 'blood_group', 'phone', 'phone_secondary', 'occupation', 'designation', 'organization', 'present_address', 'permanent_address', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation'];
+                $step2Fields = ['nid_number', 'nid_front_photo', 'nid_back_photo', 'passport_photo', 'signature_photo'];
+                $step3Fields = ['nominee_name', 'nominee_relation', 'nominee_phone', 'nominee_nid_number', 'nominee_photo', 'nominee_nid_front_photo', 'nominee_nid_back_photo', 'nominee_address'];
+                $step4Fields = ['bank_name', 'bank_branch', 'bank_account_name', 'bank_account_number', 'bank_routing_number', 'account_type', 'mobile_banking_provider', 'mobile_banking_number'];
+                $step5Fields = ['email', 'password', 'password_confirmation'];
+                
+                $stepErrors = [1 => [], 2 => [], 3 => [], 4 => [], 5 => []];
+                foreach ($errors->keys() as $key) {
+                    if (in_array($key, $step1Fields)) $stepErrors[1][$key] = $errors->get($key);
+                    elseif (in_array($key, $step2Fields)) $stepErrors[2][$key] = $errors->get($key);
+                    elseif (in_array($key, $step3Fields)) $stepErrors[3][$key] = $errors->get($key);
+                    elseif (in_array($key, $step4Fields)) $stepErrors[4][$key] = $errors->get($key);
+                    elseif (in_array($key, $step5Fields)) $stepErrors[5][$key] = $errors->get($key);
+                }
             @endphp
             <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8" x-data="{ step: {{ $initialStep }}, sameAddress: false }">
                 <!-- Progress Steps with error indicators -->
@@ -109,8 +116,10 @@
                         <div x-show="step === {{ $i }}" class="mb-6 p-4 bg-red-900/50 border border-red-700 text-red-400 rounded-lg text-sm">
                             <p class="font-medium mb-2">অনুগ্রহ করে নিচের তথ্যগুলো ঠিক করুন:</p>
                             <ul class="list-disc list-inside space-y-1">
-                                @foreach($stepErrors[$i]->all() as $error)
-                                    <li>{{ $error }}</li>
+                                @foreach($stepErrors[$i] as $fieldErrors)
+                                    @foreach($fieldErrors as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
                                 @endforeach
                             </ul>
                         </div>
