@@ -310,27 +310,16 @@ class VotingController extends Controller
             ->orderByDesc('end_time')
             ->get();
 
-        // Get committee member user IDs from latest election
-        $committeeUserIds = [];
-        if ($latestElection) {
-            foreach ($latestElection->positions as $position) {
-                if ($position->winner) {
-                    $committeeUserIds[] = $position->winner->user_id;
-                }
-            }
-        }
-
-        // Get all approved members except committee members and super-admin
-        $otherMembers = \App\Models\User::with('memberProfile')
+        // Get all approved members (including committee members)
+        $allMembers = \App\Models\User::with('memberProfile')
             ->whereHas('memberProfile')
             ->where('status', 'approved')
-            ->whereNotIn('id', $committeeUserIds)
             ->whereDoesntHave('roles', function($q) {
                 $q->where('name', 'super-admin');
             })
             ->orderBy('name')
             ->get();
 
-        return view('elections.committee', compact('committeeMembers', 'latestElection', 'pastElections', 'otherMembers'));
+        return view('elections.committee', compact('committeeMembers', 'latestElection', 'pastElections', 'allMembers'));
     }
 }
