@@ -384,6 +384,99 @@
             </div>
         </div>
 
+        <!-- Approved Expenses Section -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Approved Expenses</h3>
+                <a href="{{ route('expenses.index') }}" class="text-sm text-teal-600 dark:text-teal-400 hover:underline font-medium">View All</a>
+            </div>
+            
+            <!-- Expense Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Total Expenses</p>
+                            <p class="text-lg font-bold text-slate-800 dark:text-white">৳{{ number_format($totalApprovedExpenses, 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-teal-100 dark:bg-teal-900/50 rounded-lg">
+                            <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-xs text-slate-500 dark:text-slate-400">From Savings</p>
+                            <p class="text-lg font-bold text-teal-600 dark:text-teal-400">৳{{ number_format($expensesFromSavings, 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Manual Adjustment</p>
+                            <p class="text-lg font-bold text-amber-600 dark:text-amber-400">৳{{ number_format($expensesFromManual, 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Expenses List -->
+            <div class="space-y-3">
+                @forelse($recentExpenses as $expense)
+                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl {{ $expense->fund_source === 'monthly_savings' ? 'bg-teal-100 dark:bg-teal-900/30' : 'bg-amber-100 dark:bg-amber-900/30' }} flex items-center justify-center">
+                            @if($expense->fund_source === 'monthly_savings')
+                            <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            @else
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 dark:text-white text-sm">{{ Str::limit($expense->purpose, 25) }}</p>
+                            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                <span>{{ $expense->expense_date->format('d M Y') }}</span>
+                                <span>•</span>
+                                <span>{{ $expense->spent_by }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-slate-800 dark:text-white">৳{{ number_format($expense->amount, 0) }}</p>
+                        <span class="inline-flex px-2 py-0.5 text-xs font-bold rounded-full {{ $expense->fund_source === 'monthly_savings' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400' }}">
+                            {{ $expense->fund_source === 'monthly_savings' ? 'Savings' : 'Manual' }}
+                        </span>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                    </svg>
+                    <p class="text-sm">No approved expenses yet</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+
         <!-- Bank Info Card -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-700">
             <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 lg:p-8">

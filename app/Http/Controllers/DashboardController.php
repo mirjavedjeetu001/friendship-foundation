@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contribution;
+use App\Models\Expense;
 use App\Models\MonthlySetting;
 use App\Models\User;
 use App\Models\Withdrawal;
@@ -143,6 +144,22 @@ class DashboardController extends Controller
         $paidThisMonth = $paidUserIds->count();
         $unpaidThisMonth = $unpaidMembers->count();
 
+        // ====== Recent Approved Expenses ======
+        $recentExpenses = Expense::with(['creator', 'approver'])
+            ->approved()
+            ->latest('approved_at')
+            ->take(5)
+            ->get();
+
+        // Expense summary
+        $totalApprovedExpenses = Expense::approved()->sum('amount');
+        $expensesFromSavings = Expense::approved()
+            ->where('fund_source', 'monthly_savings')
+            ->sum('amount');
+        $expensesFromManual = Expense::approved()
+            ->where('fund_source', 'manual')
+            ->sum('amount');
+
         return view('dashboard', compact(
             'totalMembers',
             'totalContributions',
@@ -169,7 +186,11 @@ class DashboardController extends Controller
             'unpaidThisMonth',
             'isProgramStarted',
             'startMonth',
-            'startYear'
+            'startYear',
+            'recentExpenses',
+            'totalApprovedExpenses',
+            'expensesFromSavings',
+            'expensesFromManual'
         ));
     }
 }

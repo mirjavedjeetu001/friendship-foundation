@@ -250,6 +250,40 @@
                             @endcan
                         </div>
 
+                        <!-- Expenses Section -->
+                        <div class="pt-4">
+                            <p class="section-title px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Expenses</p>
+                            
+                            <a href="{{ route('expenses.index') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('expenses.index') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="All Expenses">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
+                                </svg>
+                                <span class="nav-text">All Expenses</span>
+                            </a>
+
+                            <a href="{{ route('expenses.create') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('expenses.create') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Add Expense">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                <span class="nav-text">Add Expense</span>
+                            </a>
+
+                            @can('approve contributions')
+                            <a href="{{ route('expenses.pending') }}" class="nav-link flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('expenses.pending') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Pending Approval">
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="nav-text">Pending Approval</span>
+                                </div>
+                                @php $pendingExpenses = \App\Models\Expense::pending()->count(); @endphp
+                                @if($pendingExpenses > 0)
+                                <span class="badge-count bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">{{ $pendingExpenses }}</span>
+                                @endif
+                            </a>
+                            @endcan
+                        </div>
+
                         <!-- Reports Section -->
                         <div class="pt-4">
                             <p class="section-title px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Reports</p>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ElectionController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrganizationDocumentController;
 use App\Http\Controllers\ProfileController;
@@ -57,6 +58,18 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
         ->name('withdrawals.reject')
         ->middleware('permission:reject withdrawals');
     Route::resource('withdrawals', WithdrawalController::class);
+
+    // Expense routes
+    Route::get('/expenses/pending', [ExpenseController::class, 'pending'])
+        ->name('expenses.pending')
+        ->middleware('permission:approve contributions');
+    Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])
+        ->name('expenses.approve')
+        ->middleware('permission:approve contributions');
+    Route::post('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])
+        ->name('expenses.reject')
+        ->middleware('permission:approve contributions');
+    Route::resource('expenses', ExpenseController::class)->except(['edit', 'update']);
 
     // User management routes
     Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])

@@ -24,12 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Trust all proxies for shared hosting
         $middleware->trustProxies(at: '*');
-        
-        // Temporarily exclude register and logout from CSRF verification
-        $middleware->validateCsrfTokens(except: [
-            'register',
-            'logout',
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle 419 CSRF Token Mismatch - redirect back with message
