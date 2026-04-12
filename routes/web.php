@@ -3,6 +3,7 @@
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ElectionController;
+use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrganizationDocumentController;
@@ -177,6 +178,14 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
         Route::get('/{document}/edit', [OrganizationDocumentController::class, 'edit'])->name('edit');
         Route::put('/{document}', [OrganizationDocumentController::class, 'update'])->name('update');
         Route::delete('/{document}', [OrganizationDocumentController::class, 'destroy'])->name('destroy');
+    });
+
+    // ========== EMAIL LOG ROUTES ==========
+    Route::prefix('admin/email-logs')->name('admin.email-logs.')->middleware('permission:manage settings')->group(function () {
+        Route::get('/', [EmailLogController::class, 'index'])->name('index');
+        Route::post('/send-reminders', [EmailLogController::class, 'sendReminders'])->name('send-reminders');
+        Route::post('/send-to-member/{member}', [EmailLogController::class, 'sendToMember'])->name('send-to-member');
+        Route::post('/{log}/retry', [EmailLogController::class, 'retry'])->name('retry');
     });
 });
 

@@ -352,6 +352,19 @@
                                 </svg>
                                 <span class="nav-text">Settings</span>
                             </a>
+                            
+                            <a href="{{ route('admin.email-logs.index') }}" class="nav-link flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('admin.email-logs.*') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Email Notifications">
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="nav-text">Email Notifications</span>
+                                </div>
+                                @php $pendingEmails = \App\Models\EmailLog::where('status', 'failed')->count(); @endphp
+                                @if($pendingEmails > 0)
+                                <span class="badge-count bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 text-xs font-bold px-2 py-0.5 rounded-full">{{ $pendingEmails }}</span>
+                                @endif
+                            </a>
                             @endcan
                             
                             @can('view users')
