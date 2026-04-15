@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Withdrawals') }}
             </h2>
@@ -47,9 +47,9 @@
                 </div>
             </div>
 
-            <!-- Withdrawals Table -->
+            <!-- Withdrawals Table (Desktop) -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -109,6 +109,48 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Card Layout -->
+                <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($withdrawals as $withdrawal)
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1 min-w-0 mr-3">
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $withdrawal->purpose }}</p>
+                                @if($withdrawal->description)
+                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $withdrawal->description }}</p>
+                                @endif
+                            </div>
+                            <p class="text-sm font-bold text-red-600 dark:text-red-400 whitespace-nowrap">-৳{{ number_format($withdrawal->amount, 2) }}</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                                    @if($withdrawal->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                    @elseif($withdrawal->status === 'pending') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 @endif">
+                                    {{ ucfirst($withdrawal->status) }}
+                                </span>
+                                <span class="text-xs text-gray-400">{{ $withdrawal->withdrawal_date->format('M d, Y') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('withdrawals.show', $withdrawal) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">View</a>
+                                @if($withdrawal->status === 'pending')
+                                    @can('approve withdrawals')
+                                    <form action="{{ route('withdrawals.approve', $withdrawal) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-2 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-medium rounded">Approve</button>
+                                    </form>
+                                    @endcan
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">No withdrawals found.</div>
+                    @endforelse
+                </div>
+
                 <div class="p-4">
                     {{ $withdrawals->links() }}
                 </div>

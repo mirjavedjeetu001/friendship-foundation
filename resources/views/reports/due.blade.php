@@ -8,7 +8,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $users->count() }}</p>
@@ -72,7 +72,8 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Members with Due Payments</h3>
 
                     @if($dueMembers->count() > 0)
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -135,6 +136,36 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($dueMembers as $index => $member)
+                        <div class="p-4">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center">
+                                    <div class="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400 font-medium mr-2 text-sm">
+                                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $member->name }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $member->phone ?? 'No phone' }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-base font-bold text-red-600">৳{{ number_format($settings->monthly_contribution_amount, 0) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                    {{ date('M', mktime(0, 0, 0, $month, 1)) }} {{ $year }}
+                                </span>
+                                @if(auth()->user()->can('approve contributions'))
+                                <a href="{{ route('contributions.create', ['user_id' => $member->id]) }}" class="px-3 py-1 text-xs font-medium rounded-md text-white bg-indigo-600">Add Payment</a>
+                                @elseif(auth()->id() === $member->id)
+                                <a href="{{ route('contributions.create') }}" class="px-3 py-1 text-xs font-medium rounded-md text-white bg-green-600">Pay Now</a>
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                     @else
                     <div class="text-center py-12">

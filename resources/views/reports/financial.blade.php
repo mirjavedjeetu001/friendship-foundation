@@ -147,7 +147,8 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Approved Contributions in {{ $year }}</h3>
                     @if($contributions->count() > 0)
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -173,6 +174,21 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($contributions as $contribution)
+                        <div class="p-3">
+                            <div class="flex items-start justify-between">
+                                <div class="min-w-0 mr-3">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $contribution->user->name ?? 'Unknown' }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $contribution->month_year }} · {{ $contribution->approved_at ? $contribution->approved_at->format('M d') : $contribution->created_at->format('M d') }}</p>
+                                </div>
+                                <span class="text-sm font-medium text-green-600 whitespace-nowrap">৳{{ number_format($contribution->amount, 0) }}</span>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                     @else
                     <p class="text-gray-500 dark:text-gray-400 text-center py-8">No approved contributions for {{ $year }}</p>
                     @endif
@@ -184,7 +200,8 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Withdrawals in {{ $year }}</h3>
                     @if($withdrawals->count() > 0)
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -209,6 +226,21 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($withdrawals as $withdrawal)
+                        <div class="p-3">
+                            <div class="flex items-start justify-between">
+                                <div class="min-w-0 mr-3">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $withdrawal->purpose }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $withdrawal->requester->name ?? 'Unknown' }} · {{ $withdrawal->approved_at ? $withdrawal->approved_at->format('M d') : '-' }}</p>
+                                </div>
+                                <span class="text-sm font-medium text-red-600 whitespace-nowrap">৳{{ number_format($withdrawal->amount, 0) }}</span>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                     @else
                     <p class="text-gray-500 dark:text-gray-400 text-center py-8">No withdrawals recorded for {{ $year }}</p>

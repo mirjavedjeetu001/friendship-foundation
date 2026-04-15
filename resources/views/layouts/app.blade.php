@@ -128,7 +128,7 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200">
+    <body class="font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200" x-effect="document.body.style.overflow = (sidebarOpen && window.innerWidth < 1024) ? 'hidden' : ''">
         <div class="min-h-screen flex">
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" 
@@ -168,7 +168,7 @@
                 </div>
 
                 <!-- Navigation -->
-                <nav class="flex-1 overflow-y-auto py-6 px-4">
+                <nav id="sidebar-nav" class="flex-1 overflow-y-auto py-6 px-4" style="-webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
                     <div class="space-y-1">
                         <!-- Dashboard -->
                         <a href="{{ route('dashboard') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('dashboard') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Dashboard">
@@ -281,6 +281,19 @@
                                 <span class="badge-count bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">{{ $pendingExpenses }}</span>
                                 @endif
                             </a>
+
+                            <a href="{{ route('expenses.pending-settlement') }}" class="nav-link flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('expenses.pending-settlement') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Pending Settlement">
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="nav-text">Pending Settlement</span>
+                                </div>
+                                @php $pendingSettlement = \App\Models\Expense::where('status', 'approved')->where('settlement_status', 'pending')->count(); @endphp
+                                @if($pendingSettlement > 0)
+                                <span class="badge-count bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400 text-xs font-bold px-2 py-0.5 rounded-full">{{ $pendingSettlement }}</span>
+                                @endif
+                            </a>
                             @endcan
                         </div>
 
@@ -314,6 +327,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                 </svg>
                                 <span class="nav-text">Due Payments</span>
+                            </a>
+
+                            <a href="{{ route('reports.expense') }}" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all {{ request()->routeIs('reports.expense') ? 'nav-link-active text-teal-700 dark:text-teal-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50' }}" title="Expense Report">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                </svg>
+                                <span class="nav-text">Expense Report</span>
                             </a>
                         </div>
 
@@ -453,7 +473,7 @@
             </aside>
 
             <!-- Main Content -->
-            <div class="flex-1 flex flex-col min-h-screen lg:min-w-0 main-content-area" :class="{ 'sidebar-collapsed-margin': sidebarCollapsed }">
+            <div class="flex-1 flex flex-col min-h-screen min-w-0 main-content-area" :class="{ 'sidebar-collapsed-margin': sidebarCollapsed }">
                 <!-- Top Header -->
                 <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
                     <!-- Left Side -->
@@ -589,7 +609,7 @@
                 </div>
 
                 <!-- Page Content -->
-                <main class="flex-1 px-4 lg:px-6 pb-6">
+                <main class="flex-1 px-4 lg:px-6 pb-6 overflow-x-hidden">
                     {{ $slot ?? '' }}@yield('content')
                 </main>
 
@@ -605,5 +625,6 @@
             </div>
         </div>
         @stack('scripts')
+        @include('components.app-update-popup')
     </body>
 </html>

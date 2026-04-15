@@ -181,4 +181,77 @@ class ReportController extends Controller
 
         return view('reports.due', compact('users', 'dueMembers', 'totalDue', 'month', 'year', 'settings', 'currentMonthContributions'));
     }
+
+    /**
+     * Expense report - detailed expense listing with download
+     */
+    public function expense(Request $request)
+    {
+        $month = $request->input('month');
+        $year = $request->input('year', Carbon::now()->year);
+        $status = $request->input('status', 'approved');
+        $paymentType = $request->input('payment_type');
+        $settlementStatus = $request->input('settlement_status');
+        
+        $settings = MonthlySetting::getSettings();
+
+        $query = \App\Models\Expense::with(['creator', 'approver', 'settler'])
+            ->where('status', '!=', 'pending'); // Show approved and rejected
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($month) {
+            $query->whereMonth('expense_date', $month);
+        }
+
+        $query->whereYear('expense_date', $year);
+
+        if ($paymentType) {
+            $query->where('payment_type', $paymentType);
+        }
+
+        if ($settlementStatus) {
+            if ($settlementStatus === 'settled') {
+                $query->where('settlement_status', 'settled');
+            } elseif ($settlementStatus === 'pending') {
+                $query->where('settlement_status', 'pending')->where('payment_type', 'cash');
+            }
+        }
+
+        $expenses = $query->orderBy('expense_date', 'desc')->get();
+
+        // Summary statistics
+        $totalExpenses = $expenses->where('status', 'approved')->sum('amount');
+        $cashExpenses = $expenses->where('status', 'approved')->where('payment_type', 'cash')->sum('amount');
+        $bankExpenses = $expenses->where('status', 'approved')->where('payment_type', 'bank')->sum('amount');
+        $settledAmount = $expenses->where('status', 'approved')->where('settlement_status', 'settled')->sum('amount');
+        $pendingSettlement = $expenses->where('status', 'approved')->where('settlement_status', 'pending')->where('payment_type', 'cash')->sum('amount');
+
+        // Monthly breakdown
+        $monthlyTotals = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthlyTotals[$m] = \App\Models\Expense::whereYear('expense_date', $year)
+                ->whereMonth('expense_date', $m)
+                ->approved()
+                ->sum('amount');
+        }
+
+        return view('reports.expense', compact(
+            'expenses',
+            'totalExpenses',
+            'cashExpenses',
+            'bankExpenses',
+            'settledAmount',
+            'pendingSettlement',
+            'monthlyTotals',
+            'month',
+            'year',
+            'status',
+            'paymentType',
+            'settlementStatus',
+            'settings'
+        ));
+    }
 }

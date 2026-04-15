@@ -58,9 +58,9 @@
                 </div>
             </div>
 
-            <!-- Contributions Table -->
+            <!-- Contributions Table (Desktop) -->
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 min-w-[800px]">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -143,6 +143,49 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Card Layout -->
+                <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($contributions as $contribution)
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <img src="{{ $contribution->user->avatar_url }}" alt="{{ $contribution->user->name }}" class="h-8 w-8 rounded-full object-cover flex-shrink-0">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $contribution->user->name }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $contribution->month_year }}@if($contribution->is_late) · <span class="text-red-500">Late</span>@endif</p>
+                                </div>
+                            </div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-gray-100">৳{{ number_format($contribution->amount, 0) }}</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                                    @if($contribution->status === 'approved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                    @elseif($contribution->status === 'pending') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 @endif">
+                                    {{ ucfirst($contribution->status) }}
+                                </span>
+                                <span class="text-xs text-gray-400">{{ $contribution->created_at->format('M d') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('contributions.show', $contribution) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">View</a>
+                                @if($contribution->status === 'pending')
+                                    @can('approve contributions')
+                                    <form action="{{ route('contributions.approve', $contribution) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-2 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-medium rounded">Approve</button>
+                                    </form>
+                                    @endcan
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">No contributions found.</div>
+                    @endforelse
+                </div>
+
                 <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                     {{ $contributions->links() }}
                 </div>

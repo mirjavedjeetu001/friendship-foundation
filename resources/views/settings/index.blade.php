@@ -146,14 +146,6 @@
                                 <input type="text" name="bank_name" id="bank_name" value="{{ old('bank_name', $settings->bank_name) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
 
-                            <!-- Account Number -->
-                            <div class="mb-4">
-                                <label for="account_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Account Number
-                                </label>
-                                <input type="text" name="account_number" id="account_number" value="{{ old('account_number', $settings->account_number) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-
                             <!-- Account Holder -->
                             <div class="mb-4">
                                 <label for="account_holder" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -162,10 +154,109 @@
                                 <input type="text" name="account_holder" id="account_holder" value="{{ old('account_holder', $settings->account_holder) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
 
+                            <!-- Account Number -->
+                            <div class="mb-4">
+                                <label for="account_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Account Number
+                                </label>
+                                <input type="text" name="account_number" id="account_number" value="{{ old('account_number', $settings->account_number) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- Routing Number -->
+                            <div class="mb-4">
+                                <label for="routing_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Routing Number
+                                </label>
+                                <input type="text" name="routing_number" id="routing_number" value="{{ old('routing_number', $settings->routing_number) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- Branch -->
+                            <div class="mb-4">
+                                <label for="branch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Branch Name
+                                </label>
+                                <input type="text" name="branch" id="branch" value="{{ old('branch', $settings->branch) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+
                             <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
                                 Update Bank Info
                             </button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- How to Transfer Money -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                            <svg class="w-5 h-5 inline-block mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            How to Transfer Money
+                        </h3>
+                        
+                        @if($settings->account_number)
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4 mb-4">
+                            <h4 class="font-semibold text-gray-800 dark:text-white mb-3">Bank Account Details</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Account Name:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $settings->account_holder ?? 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">A/C No:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white font-mono">{{ $settings->account_number }}</span>
+                                </div>
+                                @if($settings->routing_number)
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Routing No:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white font-mono">{{ $settings->routing_number }}</span>
+                                </div>
+                                @endif
+                                @if($settings->bank_name)
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Bank:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $settings->bank_name }}</span>
+                                </div>
+                                @endif
+                                @if($settings->branch)
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-300">Branch:</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ $settings->branch }}</span>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <h4 class="font-semibold text-gray-800 dark:text-white">Transfer Methods</h4>
+                            
+                            <div class="border-l-4 border-blue-500 pl-3 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-r">
+                                <p class="font-medium text-blue-800 dark:text-blue-300">From Other Bank (BEFTN/NPSB)</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Use Routing Number: <span class="font-mono font-bold">{{ $settings->routing_number ?? 'N/A' }}</span>
+                                </p>
+                            </div>
+                            
+                            <div class="border-l-4 border-green-500 pl-3 py-2 bg-green-50 dark:bg-green-900/30 rounded-r">
+                                <p class="font-medium text-green-800 dark:text-green-300">From Mobile Banking</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Send Money → Bank Transfer → Enter A/C No
+                                </p>
+                            </div>
+                            
+                            <div class="border-l-4 border-orange-500 pl-3 py-2 bg-orange-50 dark:bg-orange-900/30 rounded-r">
+                                <p class="font-medium text-orange-800 dark:text-orange-300">Cash Deposit</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Visit any branch with A/C number
+                                </p>
+                            </div>
+                        </div>
+                        @else
+                        <p class="text-gray-500 dark:text-gray-400 text-center py-6">
+                            Please add bank account details above
+                        </p>
+                        @endif
                     </div>
                 </div>
 
@@ -189,7 +280,7 @@
 
     <!-- Balance Adjustment Modal -->
     <div id="balance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div class="relative top-20 mx-4 sm:mx-auto p-5 border w-auto sm:w-96 max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Adjust Bank Balance</h3>
             <form action="{{ route('settings.balance') }}" method="POST">
                 @csrf

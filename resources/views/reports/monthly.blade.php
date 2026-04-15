@@ -35,7 +35,7 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $users->count() }}</p>
@@ -65,7 +65,8 @@
                         {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }} - Member Contribution Status
                     </h3>
 
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -144,6 +145,51 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($users as $index => $user)
+                        @php
+                            $contribution = $contributions->where('user_id', $user->id)->where('status', 'approved')->first();
+                            $pendingContribution = $contributions->where('user_id', $user->id)->where('status', 'pending')->first();
+                        @endphp
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center min-w-0 mr-3">
+                                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-8 w-8 rounded-full object-cover mr-2">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $user->name }}</p>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    {{ $contribution ? '৳' . number_format($contribution->amount, 0) : '-' }}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    @if($contribution)
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Paid</span>
+                                        @if($contribution->is_late)
+                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">Late</span>
+                                        @else
+                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">On Time</span>
+                                        @endif
+                                    @elseif($pendingContribution)
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Pending</span>
+                                    @else
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Unpaid</span>
+                                    @endif
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    @if($contribution && $contribution->created_at)
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $contribution->created_at->format('M d') }}</span>
+                                    @endif
+                                    @if($contribution && $contribution->payment_slip)
+                                    <a href="{{ Storage::url($contribution->payment_slip) }}" target="_blank" class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">Slip</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

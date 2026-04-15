@@ -27,7 +27,7 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $users->count() }}</p>
@@ -61,7 +61,8 @@
                         {{ $year }} - Member Contribution Matrix
                     </h3>
 
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -144,6 +145,65 @@
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+
+                    <!-- Mobile Card Layout -->
+                    <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($users as $user)
+                        @php $userTotal = 0; @endphp
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center">
+                                    <div class="h-7 w-7 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-medium mr-2 text-xs">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-6 gap-1.5 mb-2">
+                                @for($m = 1; $m <= 12; $m++)
+                                @php
+                                    $contribution = $contributions->where('user_id', $user->id)->where('month', $m)->first();
+                                    if($contribution) $userTotal += $contribution->amount;
+                                    $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+                                @endphp
+                                <div class="flex flex-col items-center">
+                                    <span class="text-[9px] text-gray-400 mb-0.5">{{ $monthNames[$m-1] }}</span>
+                                    @if($contribution)
+                                        @if($contribution->is_late)
+                                        <span class="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                                            <svg class="w-3 h-3 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </span>
+                                        @else
+                                        <span class="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                            <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </span>
+                                        @endif
+                                    @elseif($m <= date('n') || $year < date('Y'))
+                                    <span class="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </span>
+                                    @else
+                                    <span class="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </span>
+                                    @endif
+                                </div>
+                                @endfor
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">Total: ৳{{ number_format($userTotal, 0) }}</span>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
 
                     <!-- Legend -->

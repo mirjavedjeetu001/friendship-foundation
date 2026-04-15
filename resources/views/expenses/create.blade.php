@@ -88,6 +88,34 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Payment Type -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Payment Type <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="flex flex-wrap gap-4">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="radio" name="expenses[0][payment_type]" value="cash" checked
+                                                    class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                    <span class="font-medium">Cash</span>
+                                                    <span class="text-gray-500 dark:text-gray-400">(Needs bank settlement later)</span>
+                                                </span>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="radio" name="expenses[0][payment_type]" value="bank"
+                                                    class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                                    <span class="font-medium">Bank/Direct</span>
+                                                    <span class="text-gray-500 dark:text-gray-400">(Paid from bank directly)</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        @error('expenses.0.payment_type')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
                                     <!-- Description -->
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

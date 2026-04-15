@@ -10,13 +10,115 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                 <div class="p-6">
                     <!-- Bank Info Card -->
-                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-4 mb-6 text-white">
-                        <h3 class="font-semibold mb-2">Bank Account for Payment</h3>
-                        <p class="text-sm text-indigo-100">{{ $settings->bank_name ?? 'Bank Name Not Set' }}</p>
-                        <p class="text-lg font-bold">{{ $settings->account_number ?? 'Account Not Set' }}</p>
-                        <p class="text-sm text-indigo-100">{{ $settings->account_holder ?? 'Account Holder Not Set' }}</p>
-                        <div class="mt-2 pt-2 border-t border-indigo-400">
-                            <p class="text-sm">Minimum Contribution: <span class="font-bold">৳{{ number_format($settings->monthly_contribution_amount, 2) }}</span></p>
+                    <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 rounded-xl p-4 mb-4 text-white shadow-lg">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4 10V17H6V10H4M10 10V17H12V10H10M2 22H22V19H2V22M16 10V17H18V10H16M12 1L2 6V8H22V6L12 1Z"/>
+                            </svg>
+                            <span class="font-bold">Bank Transfer Details</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="bg-white/10 rounded-lg p-2.5">
+                                <p class="text-indigo-200 text-xs uppercase tracking-wider">Account Holder</p>
+                                <p class="font-bold">{{ $settings->account_holder ?? 'Allied Group' }}</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-2.5">
+                                <p class="text-indigo-200 text-xs uppercase tracking-wider">Account Number</p>
+                                <p class="font-mono font-bold">{{ $settings->account_number ?? 'N/A' }}</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-2.5">
+                                <p class="text-indigo-200 text-xs uppercase tracking-wider">Bank</p>
+                                <p class="font-semibold">{{ $settings->bank_name ?? 'Bank' }}</p>
+                            </div>
+                            @if($settings->routing_number)
+                            <div class="bg-white/10 rounded-lg p-2.5">
+                                <p class="text-indigo-200 text-xs uppercase tracking-wider">Routing</p>
+                                <p class="font-mono font-semibold">{{ $settings->routing_number }}</p>
+                            </div>
+                            @endif
+                            @if($settings->branch)
+                            <div class="bg-white/10 rounded-lg p-2.5 col-span-2">
+                                <p class="text-indigo-200 text-xs uppercase tracking-wider">Branch</p>
+                                <p class="font-semibold">{{ $settings->branch }}</p>
+                            </div>
+                            @endif
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
+                            <span class="text-indigo-100 text-sm">Monthly Contribution</span>
+                            <span class="text-xl font-bold">৳{{ number_format($settings->monthly_contribution_amount, 2) }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- How to Deposit Money (Collapsible) -->
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-5 border border-emerald-200 dark:border-gray-500 overflow-hidden shadow-sm">
+                        <button type="button" onclick="document.getElementById('deposit-guide').classList.toggle('hidden'); document.getElementById('collapse-icon').classList.toggle('rotate-180'); this.querySelector('.tap-hint').classList.toggle('hidden');" class="w-full flex items-center justify-between p-4 text-left hover:bg-emerald-100/50 dark:hover:bg-gray-600 transition-colors active:bg-emerald-100 dark:active:bg-gray-500">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-white text-base">How to Deposit Money</p>
+                                    <p class="tap-hint text-sm text-emerald-600 dark:text-emerald-400">Tap to view guide</p>
+                                </div>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-100 dark:bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg id="collapse-icon" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </button>
+                        
+                        <div id="deposit-guide" class="hidden px-4 pb-4">
+                            <div class="space-y-3">
+                                <!-- Method 1: Other Bank Transfer -->
+                                <div class="flex items-start space-x-3 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 dark:text-white">From Other Bank (BEFTN/NPSB)</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            Use your bank app/internet banking → Fund Transfer → Enter A/C: <span class="font-mono font-bold">{{ $settings->account_number }}</span>
+                                            @if($settings->routing_number)
+                                            <br>Routing No: <span class="font-mono font-bold">{{ $settings->routing_number }}</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Method 2: Mobile Banking -->
+                                <div class="flex items-start space-x-3 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 dark:text-white">From Mobile Banking (bKash/Nagad/Rocket)</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            Send Money → Bank Transfer → Select {{ $settings->bank_name ?? 'Bank' }} → Enter A/C: <span class="font-mono font-bold">{{ $settings->account_number }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Method 3: Branch Deposit -->
+                                <div class="flex items-start space-x-3 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 dark:text-white">Cash Deposit at Branch</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                                            Visit any {{ $settings->bank_name ?? 'bank' }} branch → Fill deposit slip with A/C: <span class="font-mono font-bold">{{ $settings->account_number }}</span>
+                                            @if($settings->branch)
+                                            <br>Nearest Branch: <span class="font-semibold">{{ $settings->branch }}</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg border-l-4 border-yellow-500">
+                                <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                    <strong>Important:</strong> After payment, upload the receipt/screenshot below as proof.
+                                </p>
+                            </div>
                         </div>
                     </div>
 

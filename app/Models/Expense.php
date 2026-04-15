@@ -24,6 +24,11 @@ class Expense extends Model
         'rejection_reason',
         'fund_source',
         'fund_source_note',
+        'payment_type',
+        'settlement_status',
+        'settled_by',
+        'settled_at',
+        'settlement_note',
         'created_by',
     ];
 
@@ -33,8 +38,22 @@ class Expense extends Model
             'expense_date' => 'date',
             'amount' => 'decimal:2',
             'approved_at' => 'datetime',
+            'settled_at' => 'datetime',
         ];
     }
+
+    /**
+     * Payment type constants
+     */
+    const PAYMENT_TYPE_CASH = 'cash';
+    const PAYMENT_TYPE_BANK = 'bank';
+
+    /**
+     * Settlement status constants
+     */
+    const SETTLEMENT_PENDING = 'pending';
+    const SETTLEMENT_SETTLED = 'settled';
+    const SETTLEMENT_NOT_APPLICABLE = 'not_applicable';
 
     /**
      * Fund source options
@@ -63,6 +82,71 @@ class Expense extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who settled this expense
+     */
+    public function settler(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'settled_by');
+    }
+
+    /**
+     * Check if expense is cash payment
+     */
+    public function isCashPayment(): bool
+    {
+        return $this->payment_type === self::PAYMENT_TYPE_CASH;
+    }
+
+    /**
+     * Check if expense is bank payment
+     */
+    public function isBankPayment(): bool
+    {
+        return $this->payment_type === self::PAYMENT_TYPE_BANK;
+    }
+
+    /**
+     * Check if expense needs bank settlement
+     */
+    public function needsSettlement(): bool
+    {
+        return $this->isApproved() && $this->isCashPayment() && $this->settlement_status === self::SETTLEMENT_PENDING;
+    }
+
+    /**
+     * Check if expense is settled
+     */
+    public function isSettled(): bool
+    {
+        return $this->settlement_status === self::SETTLEMENT_SETTLED || $this->settlement_status === self::SETTLEMENT_NOT_APPLICABLE;
+    }
+
+    /**
+     * Scope for expenses pending settlement
+     */
+    public function scopePendingSettlement($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED)
+            ->where('payment_type', self::PAYMENT_TYPE_CASH)
+            ->where('settlement_status', self::SETTLEMENT_PENDING);
+    }
+
+    /**
+     * Scope for settled expenses
+     */
+    public function scopeSettledFromBank($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED)
+            ->where(function($q) {
+                $q->where('settlement_status', self::SETTLEMENT_SETTLED)
+                  ->orWhere(function($q2) {
+                      $q2->where('payment_type', self::PAYMENT_TYPE_BANK)
+                         ->where('settlement_status', self::SETTLEMENT_NOT_APPLICABLE);
+                  });
+            });
     }
 
     /**

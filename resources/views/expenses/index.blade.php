@@ -14,47 +14,35 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 overflow-hidden">
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                    <div class="flex items-center">
-                        <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Approved</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">৳{{ number_format($totalApproved, 0) }}</p>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Total Approved</p>
+                    <p class="text-lg font-bold text-green-600">৳{{ number_format($totalApproved, 0) }}</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                    <div class="flex items-center">
-                        <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Pending Approval</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">৳{{ number_format($totalPending, 0) }}</p>
-                        </div>
-                    </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Pending Approval</p>
+                    <p class="text-lg font-bold text-yellow-600">৳{{ number_format($totalPending, 0) }}</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                    <div class="flex items-center">
-                        <div class="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
-                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">This Month</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">৳{{ number_format($totalThisMonth, 0) }}</p>
-                        </div>
-                    </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">This Month</p>
+                    <p class="text-lg font-bold text-indigo-600">৳{{ number_format($totalThisMonth, 0) }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Settled from Bank</p>
+                    <p class="text-lg font-bold text-blue-600">৳{{ number_format($totalSettled, 0) }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 {{ $totalPendingSettlement > 0 ? 'ring-2 ring-orange-400' : '' }}">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Pending Settlement</p>
+                    <p class="text-lg font-bold text-orange-600">৳{{ number_format($totalPendingSettlement, 0) }}</p>
+                    @if($totalPendingSettlement > 0)
+                    <a href="{{ route('expenses.pending-settlement') }}" class="text-xs text-orange-600 hover:underline">View →</a>
+                    @endif
+                </div>
+                <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg shadow-sm p-3 text-white">
+                    <p class="text-xs text-emerald-100">Bank Balance</p>
+                    <p class="text-lg font-bold">৳{{ number_format($bankBalance, 0) }}</p>
                 </div>
             </div>
 
@@ -109,9 +97,9 @@
                 </div>
             </div>
 
-            <!-- Expenses Table -->
+            <!-- Expenses Table (Desktop) -->
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 min-w-[900px]">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -119,9 +107,9 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Purpose</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Spent By</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fund Source</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Approved By</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Settlement</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -144,26 +132,26 @@
                                     <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">৳{{ number_format($expense->amount, 0) }}</div>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
+                                    @if($expense->payment_type === 'cash')
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-400">Cash</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400">Bank</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="px-2 py-1 text-xs font-medium rounded-full {{ $expense->status_badge_class }}">
                                         {{ ucfirst($expense->status) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($expense->fund_source)
-                                        <div class="text-sm text-gray-900 dark:text-gray-100">{{ $expense->fund_source_label }}</div>
-                                        @if($expense->fund_source === 'manual' && $expense->fund_source_note)
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ $expense->fund_source_note }}</div>
+                                    @if($expense->status === 'approved')
+                                        @if($expense->payment_type === 'bank' || $expense->settlement_status === 'settled')
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">Settled</span>
+                                        @elseif($expense->settlement_status === 'pending')
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-400">Pending</span>
+                                        @else
+                                            <span class="text-gray-400">-</span>
                                         @endif
-                                    @else
-                                        <span class="text-gray-400">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($expense->approver)
-                                        <div class="flex items-center">
-                                            <img src="{{ $expense->approver->avatar_url }}" alt="{{ $expense->approver->name }}" class="h-6 w-6 rounded-full object-cover mr-2">
-                                            <span class="text-sm text-gray-900 dark:text-gray-100">{{ $expense->approver->name }}</span>
-                                        </div>
                                     @else
                                         <span class="text-gray-400">-</span>
                                     @endif
@@ -209,7 +197,54 @@
                         </tbody>
                     </table>
                 </div>
-                
+
+                <!-- Mobile Card Layout -->
+                <div class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($expenses as $expense)
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1 min-w-0 mr-3">
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $expense->purpose }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $expense->expense_date->format('d M Y') }} · {{ $expense->spent_by }}</p>
+                            </div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">৳{{ number_format($expense->amount, 0) }}</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $expense->status_badge_class }}">{{ ucfirst($expense->status) }}</span>
+                                @if($expense->payment_type === 'cash')
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-400">Cash</span>
+                                @else
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400">Bank</span>
+                                @endif
+                                @if($expense->status === 'approved')
+                                    @if($expense->payment_type === 'bank' || $expense->settlement_status === 'settled')
+                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400">Settled</span>
+                                    @elseif($expense->settlement_status === 'pending')
+                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-400">Pending</span>
+                                    @endif
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('expenses.show', $expense) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">View</a>
+                                @if($expense->isPending() && (auth()->id() === $expense->created_by || auth()->user()->hasAnyRole(['super-admin', 'admin'])))
+                                    <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('Delete this expense?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-2 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded">Delete</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <p>No expenses found.</p>
+                        <a href="{{ route('expenses.create') }}" class="mt-2 inline-flex items-center text-indigo-600 dark:text-indigo-400 text-sm">+ Add your first expense</a>
+                    </div>
+                    @endforelse
+                </div>
+
                 @if($expenses->hasPages())
                 <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                     {{ $expenses->links() }}

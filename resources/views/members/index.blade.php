@@ -20,7 +20,8 @@
     @endif
 
     <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table -->
+        <div class="hidden sm:block overflow-x-auto">
         <table class="w-full min-w-[800px]">
             <thead class="bg-gray-700/50">
                 <tr>
@@ -92,6 +93,59 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
+
+        <!-- Mobile Card Layout -->
+        <div class="sm:hidden divide-y divide-gray-700">
+            @forelse($members as $member)
+            <div class="p-4">
+                <div class="flex items-center space-x-3 mb-3">
+                    @if($member->memberProfile?->passport_photo)
+                        <img src="{{ asset('storage/' . $member->memberProfile->passport_photo) }}" class="w-10 h-10 rounded-lg object-cover">
+                    @else
+                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-400 font-medium">{{ substr($member->name, 0, 1) }}</span>
+                        </div>
+                    @endif
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white font-medium truncate">{{ $member->name }}</p>
+                        <p class="text-gray-500 text-xs">{{ $member->email }}</p>
+                        <p class="text-gray-500 text-xs">{{ $member->phone }} · Joined {{ $member->created_at->format('d M Y') }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        @if($member->status === 'approved')
+                            <span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">Approved</span>
+                        @elseif($member->status === 'pending')
+                            <span class="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-xs">Pending</span>
+                        @else
+                            <span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs">Rejected</span>
+                        @endif
+                        <form action="{{ route('members.update-role', $member) }}" method="POST" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <select name="role" onchange="this.form.submit()" class="bg-gray-700 border border-gray-600 text-gray-300 text-xs rounded px-2 py-1">
+                                <option value="member" {{ $member->hasRole('member') ? 'selected' : '' }}>Member</option>
+                                <option value="accountant" {{ $member->hasRole('accountant') ? 'selected' : '' }}>Accountant</option>
+                                <option value="admin" {{ $member->hasRole('admin') ? 'selected' : '' }}>Admin</option>
+                                <option value="super-admin" {{ $member->hasRole('super-admin') ? 'selected' : '' }}>Super Admin</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('members.show', $member) }}" class="p-1.5 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition" title="View">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </a>
+                        <a href="{{ route('members.download', $member) }}" class="p-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-500 transition" title="Download">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-500">No members found</div>
+            @endforelse
         </div>
     </div>
 

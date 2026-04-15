@@ -40,13 +40,13 @@
                                                 </div>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <div class="flex items-center gap-2 mb-1">
-                                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $expense->purpose }}</h3>
-                                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $expense->purpose }}</h3>
+                                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
                                                         Pending
                                                     </span>
                                                 </div>
-                                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                                                <div class="grid grid-cols-2 gap-3 text-sm">
                                                     <div>
                                                         <span class="text-gray-500 dark:text-gray-400">Date:</span>
                                                         <span class="ml-1 text-gray-900 dark:text-gray-100">{{ $expense->expense_date->format('d M Y') }}</span>
@@ -123,7 +123,7 @@
 
                         <!-- Reject Modal -->
                         <div id="rejectModal_{{ $expense->id }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white dark:bg-gray-800">
+                            <div class="relative top-20 mx-4 sm:mx-auto p-5 border w-auto sm:w-96 max-w-lg shadow-lg rounded-lg bg-white dark:bg-gray-800">
                                 <div class="mt-3">
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Reject Expense</h3>
                                     <form action="{{ route('expenses.reject', $expense) }}" method="POST">

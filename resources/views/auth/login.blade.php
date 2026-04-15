@@ -107,6 +107,16 @@
                         Don't have an account? <a href="{{ route('register') }}" class="text-indigo-400 hover:text-indigo-300 font-medium">Register here</a>
                     </p>
                 </div>
+
+                <!-- Download App -->
+                <div class="mt-4 text-center">
+                    <a href="{{ route('app.download') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Download Android App
+                    </a>
+                </div>
             </div>
 
             <!-- Footer -->
@@ -117,5 +127,6 @@
             </div>
         </div>
     </div>
+    @include('components.app-update-popup')
 </body>
 </html>

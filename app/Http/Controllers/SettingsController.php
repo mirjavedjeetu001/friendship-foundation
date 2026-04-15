@@ -59,12 +59,14 @@ class SettingsController extends Controller
             
             $settings->update($validated);
             
-        } elseif ($request->has('bank_name') || $request->has('account_number') || $request->has('account_holder')) {
+        } elseif ($request->has('bank_name') || $request->has('account_number') || $request->has('account_holder') || $request->has('routing_number') || $request->has('branch')) {
             // Bank Information form
             $validated = $request->validate([
                 'bank_name' => 'nullable|string|max:255',
                 'account_number' => 'nullable|string|max:50',
                 'account_holder' => 'nullable|string|max:255',
+                'routing_number' => 'nullable|string|max:50',
+                'branch' => 'nullable|string|max:255',
             ]);
             
             $settings->update($validated);

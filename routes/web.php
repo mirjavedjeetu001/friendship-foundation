@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppDownloadController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ElectionController;
@@ -14,6 +15,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VotingController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
+
+// App Download Page (Public)
+Route::get('/app', [AppDownloadController::class, 'index'])->name('app.download');
+Route::get('/app/download', [AppDownloadController::class, 'download'])->name('app.download.file');
+Route::get('/app/count', [AppDownloadController::class, 'count'])->name('app.download.count');
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -64,11 +70,20 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
     Route::get('/expenses/pending', [ExpenseController::class, 'pending'])
         ->name('expenses.pending')
         ->middleware('permission:approve contributions');
+    Route::get('/expenses/pending-settlement', [ExpenseController::class, 'pendingSettlement'])
+        ->name('expenses.pending-settlement')
+        ->middleware('permission:approve contributions');
     Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])
         ->name('expenses.approve')
         ->middleware('permission:approve contributions');
     Route::post('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])
         ->name('expenses.reject')
+        ->middleware('permission:approve contributions');
+    Route::post('/expenses/{expense}/settle', [ExpenseController::class, 'settle'])
+        ->name('expenses.settle')
+        ->middleware('permission:approve contributions');
+    Route::post('/expenses/bulk-settle', [ExpenseController::class, 'bulkSettle'])
+        ->name('expenses.bulk-settle')
         ->middleware('permission:approve contributions');
     Route::resource('expenses', ExpenseController::class)->except(['edit', 'update']);
 
@@ -122,6 +137,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
         Route::get('/yearly', [ReportController::class, 'yearly'])->name('yearly');
         Route::get('/financial', [ReportController::class, 'financial'])->name('financial');
         Route::get('/due', [ReportController::class, 'due'])->name('due');
+        Route::get('/expense', [ReportController::class, 'expense'])->name('expense');
     });
 
     // ========== ELECTION & VOTING ROUTES ==========

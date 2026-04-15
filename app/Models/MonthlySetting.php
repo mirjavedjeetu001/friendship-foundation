@@ -20,6 +20,8 @@ class MonthlySetting extends Model
         'bank_name',
         'account_number',
         'account_holder',
+        'routing_number',
+        'branch',
         'is_active',
     ];
 

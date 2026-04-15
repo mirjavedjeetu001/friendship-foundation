@@ -47,8 +47,14 @@ class DashboardController extends Controller
         $totalWithdrawals = Withdrawal::approved()
             ->where('withdrawal_date', '>=', $startDate)
             ->sum('amount');
-            
-        $currentBalance = $totalContributions - $totalWithdrawals;
+
+        // Total approved expenses settled from savings (deducted from bank)
+        $totalExpensesFromSavings = Expense::approved()
+            ->where('fund_source', 'monthly_savings')
+            ->settledFromBank()
+            ->sum('amount');
+
+        $currentBalance = $totalContributions - $totalWithdrawals - $totalExpensesFromSavings;
 
         // Current month stats (only if program has started)
         $currentMonthContributions = 0;
