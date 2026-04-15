@@ -23,6 +23,7 @@ class MonthlySetting extends Model
         'routing_number',
         'branch',
         'is_active',
+        'force_app_update',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class MonthlySetting extends Model
             'monthly_contribution_amount' => 'decimal:2',
             'bank_balance' => 'decimal:2',
             'is_active' => 'boolean',
+            'force_app_update' => 'boolean',
             'start_month' => 'integer',
             'start_year' => 'integer',
         ];

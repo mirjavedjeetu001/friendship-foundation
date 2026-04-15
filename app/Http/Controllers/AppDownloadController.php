@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppDownload;
+use App\Models\MonthlySetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,8 +18,8 @@ class AppDownloadController extends Controller
         $todayDownloads = AppDownload::todayDownloads();
         $monthDownloads = AppDownload::monthDownloads();
         
-        $appVersion = '1.0';
-        $appSize = '2.7 MB';
+        $appVersion = '9.0';
+        $appSize = '2.9 MB';
         $lastUpdated = '15 April 2026';
         $minAndroid = 'Android 7.0+';
 
@@ -46,11 +47,11 @@ class AppDownloadController extends Controller
             'user_agent' => substr($request->userAgent() ?? '', 0, 255),
             'device_type' => $deviceInfo['device_type'],
             'platform' => $deviceInfo['platform'],
-            'version' => '1.0',
+            'version' => '9.0',
         ]);
 
-        // Check if APK exists
-        $apkPath = public_path('downloads/AlliedGroup.apk');
+        // Check if APK exists in public root
+        $apkPath = public_path('AlliedGroup.apk');
         
         if (file_exists($apkPath)) {
             return response()->download($apkPath, 'AlliedGroup.apk', [
@@ -70,6 +71,19 @@ class AppDownloadController extends Controller
             'total' => AppDownload::totalDownloads(),
             'today' => AppDownload::todayDownloads(),
             'month' => AppDownload::monthDownloads(),
+        ]);
+    }
+
+    /**
+     * Get app update settings (API for popup)
+     */
+    public function updateSettings()
+    {
+        $settings = MonthlySetting::getSettings();
+        
+        return response()->json([
+            'force_update' => $settings->force_app_update ?? false,
+            'min_version' => 9, // Version 9 er niche hole update korte hobe
         ]);
     }
 }

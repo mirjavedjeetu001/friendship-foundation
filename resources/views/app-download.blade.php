@@ -546,7 +546,7 @@
                     </div>
                     
                     <div class="download-buttons">
-                        <a href="{{ route('app.download.file') }}" class="btn-download-main" id="downloadBtn">
+                        <a href="{{ route('app.download.file') }}" class="btn-download-main" id="downloadBtn" download="AlliedGroup.apk">
                             <i class="fab fa-android"></i>
                             <div>
                                 <small>Free Download</small>
@@ -560,6 +560,20 @@
                                 <strong>Google Play</strong>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Download Help Text -->
+                    <div id="downloadHelp" style="display:none; margin-top: 15px; padding: 12px 15px; background: rgba(255,255,255,0.1); border-radius: 10px; backdrop-filter: blur(10px);">
+                        <p style="color: #fbbf24; margin: 0 0 8px 0; font-size: 0.9rem;">
+                            <i class="fas fa-info-circle me-1"></i> Download না হলে:
+                        </p>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                            নিচের link টি copy করে Chrome/Browser এ paste করুন:<br>
+                            <code id="downloadLink" style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 5px; font-size: 0.8rem; word-break: break-all; display: inline-block; margin-top: 5px;">{{ url(route('app.download.file')) }}</code>
+                            <button onclick="copyDownloadLink()" style="background: #10B981; border: none; color: white; padding: 4px 12px; border-radius: 5px; font-size: 0.8rem; margin-left: 8px; cursor: pointer;">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </p>
                     </div>
                     
                     <div class="trust-badges">
@@ -717,5 +731,78 @@
     </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is accessing from app
+        var ua = navigator.userAgent;
+        var isFromApp = ua.indexOf('AlliedGroupApp') !== -1 || (ua.indexOf('wv)') !== -1 && ua.indexOf('Android') !== -1);
+        
+        // Show help text if from app
+        if (isFromApp) {
+            document.getElementById('downloadHelp').style.display = 'block';
+        }
+        
+        // Show help text on download button click (fallback for all users)
+        document.getElementById('downloadBtn').addEventListener('click', function(e) {
+            // Show help text after a short delay
+            setTimeout(function() {
+                document.getElementById('downloadHelp').style.display = 'block';
+            }, 500);
+            
+            // If from app, try to open in external browser
+            if (isFromApp) {
+                e.preventDefault();
+                
+                // Try to open in external browser
+                var downloadUrl = '{{ url(route("app.download.file")) }}';
+                
+                // Android intent to open in external browser
+                var intent = 'intent://' + downloadUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW;end';
+                
+                // First try: Direct external browser
+                window.open(downloadUrl, '_system');
+                
+                // Fallback: Show copy instruction
+                setTimeout(function() {
+                    document.getElementById('downloadHelp').style.display = 'block';
+                    document.getElementById('downloadHelp').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 300);
+                
+                return false;
+            }
+        });
+        
+        // Copy download link function
+        function copyDownloadLink() {
+            var link = document.getElementById('downloadLink').textContent;
+            
+            // Try modern clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(function() {
+                    alert('Link copied! এখন Chrome/Browser এ paste করে download করুন।');
+                }).catch(function() {
+                    // Fallback to old method
+                    fallbackCopy(link);
+                });
+            } else {
+                fallbackCopy(link);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('Link copied! এখন Chrome/Browser এ paste করে download করুন।');
+            } catch (err) {
+                alert('Manual copy করুন: ' + text);
+            }
+            document.body.removeChild(textarea);
+        }
+    </script>
 </body>
 </html>

@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/app', [AppDownloadController::class, 'index'])->name('app.download');
 Route::get('/app/download', [AppDownloadController::class, 'download'])->name('app.download.file');
 Route::get('/app/count', [AppDownloadController::class, 'count'])->name('app.download.count');
+Route::get('/app/update-settings', [AppDownloadController::class, 'updateSettings'])->name('app.update.settings');
 
 Route::get('/', function () {
     return redirect()->route('login');

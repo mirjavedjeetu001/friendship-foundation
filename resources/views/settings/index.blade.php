@@ -123,6 +123,17 @@
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Months before this will not be shown as due</p>
                             </div>
 
+                            <!-- Force App Update Toggle -->
+                            <div class="mb-4">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="force_app_update" value="1" {{ $settings->force_app_update ? 'checked' : '' }} class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Force App Update (Version < 9)
+                                    </span>
+                                </label>
+                                <p class="mt-1 ml-6 text-sm text-gray-500 dark:text-gray-400">When enabled, users with version < 9 cannot dismiss the update popup</p>
+                            </div>
+
                             <button type="submit" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
                                 Save Settings
                             </button>

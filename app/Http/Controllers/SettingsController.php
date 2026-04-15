@@ -57,6 +57,9 @@ class SettingsController extends Controller
                 'start_year' => 'nullable|integer|between:2020,2050',
             ]);
             
+            // Handle checkbox - set to false if not checked
+            $validated['force_app_update'] = $request->has('force_app_update');
+            
             $settings->update($validated);
             
         } elseif ($request->has('bank_name') || $request->has('account_number') || $request->has('account_holder') || $request->has('routing_number') || $request->has('branch')) {
