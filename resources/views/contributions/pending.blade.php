@@ -37,17 +37,63 @@
                                         @endif
                                         <span class="text-xs">{{ $contribution->created_at->diffForHumans() }}</span>
                                     </div>
+
+                                    {{-- Approval Status Badges --}}
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        @if($contribution->isAdminApproved())
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                Admin: {{ $contribution->adminApprover->name }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 rounded-full text-xs font-medium">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                                Admin: Pending
+                                            </span>
+                                        @endif
+
+                                        @if($contribution->isAccountantApproved())
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                Accountant: {{ $contribution->accountantApprover->name }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                                Accountant: {{ $contribution->isAdminApproved() ? 'Waiting' : 'Locked' }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-2 flex-shrink-0">
                                     <a href="{{ route('contributions.show', $contribution) }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium transition">
                                         View
                                     </a>
-                                    <form action="{{ route('contributions.approve', $contribution) }}" method="POST" class="inline">
+
+                                    {{-- Admin Approve Button --}}
+                                    @if(auth()->user()->hasRole(['admin', 'super-admin']) && !$contribution->isAdminApproved())
+                                    <form action="{{ route('contributions.admin-approve', $contribution) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition">
-                                            Approve
+                                        <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition">
+                                            Admin Approve
                                         </button>
                                     </form>
+                                    @endif
+
+                                    {{-- Accountant Approve Button (only visible after admin approval) --}}
+                                    @if(auth()->user()->hasRole(['accountant', 'super-admin']) && $contribution->isAdminApproved() && !$contribution->isAccountantApproved())
+                                    <form action="{{ route('contributions.accountant-approve', $contribution) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition">
+                                            Final Approve
+                                        </button>
+                                    </form>
+                                    @elseif(auth()->user()->hasRole(['accountant']) && !$contribution->isAdminApproved())
+                                    <button disabled class="px-3 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed opacity-50" title="Admin approval needed first">
+                                        Final Approve
+                                    </button>
+                                    @endif
+
                                     <button onclick="openRejectModal({{ $contribution->id }})" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition">
                                         Reject
                                     </button>

@@ -50,6 +50,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
     Route::post('/contributions/{contribution}/approve', [ContributionController::class, 'approve'])
         ->name('contributions.approve')
         ->middleware('permission:approve contributions');
+    Route::post('/contributions/{contribution}/admin-approve', [ContributionController::class, 'adminApprove'])
+        ->name('contributions.admin-approve')
+        ->middleware('permission:approve contributions');
+    Route::post('/contributions/{contribution}/accountant-approve', [ContributionController::class, 'accountantApprove'])
+        ->name('contributions.accountant-approve')
+        ->middleware('permission:approve contributions');
     Route::post('/contributions/{contribution}/reject', [ContributionController::class, 'reject'])
         ->name('contributions.reject')
         ->middleware('permission:reject contributions');

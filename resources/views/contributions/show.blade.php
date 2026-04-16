@@ -76,21 +76,53 @@
                     @endif
 
                     <!-- Approval Info -->
-                    @if($contribution->status !== 'pending')
+                    @if($contribution->status !== 'pending' || $contribution->isAdminApproved())
                     <div class="border-t dark:border-gray-700 pt-6 mt-6">
                         <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                            {{ $contribution->status === 'approved' ? 'Approval' : 'Rejection' }} Details
+                            Approval Progress
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">{{ $contribution->status === 'approved' ? 'Approved' : 'Rejected' }} By</label>
-                                <p class="text-gray-900 dark:text-gray-100">{{ $contribution->approver?->name ?? 'N/A' }}</p>
+
+                        {{-- Approval Steps --}}
+                        <div class="space-y-4">
+                            {{-- Step 1: Admin Approval --}}
+                            <div class="flex items-start gap-3 p-3 rounded-lg {{ $contribution->isAdminApproved() ? 'bg-green-50 dark:bg-green-900/20' : 'bg-yellow-50 dark:bg-yellow-900/20' }}">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center {{ $contribution->isAdminApproved() ? 'bg-green-500' : 'bg-yellow-500' }} text-white text-sm font-bold">
+                                    @if($contribution->isAdminApproved()) ✓ @else 1 @endif
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">Admin Approval</p>
+                                    @if($contribution->isAdminApproved())
+                                        <p class="text-sm text-green-600 dark:text-green-400">
+                                            Approved by <strong>{{ $contribution->adminApprover->name }}</strong>
+                                            on {{ $contribution->admin_approved_at->format('d M Y, h:i A') }}
+                                        </p>
+                                    @else
+                                        <p class="text-sm text-yellow-600 dark:text-yellow-400">Waiting for admin approval</p>
+                                    @endif
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Date</label>
-                                <p class="text-gray-900 dark:text-gray-100">{{ $contribution->approved_at?->format('F d, Y h:i A') ?? 'N/A' }}</p>
+
+                            {{-- Step 2: Accountant Approval --}}
+                            <div class="flex items-start gap-3 p-3 rounded-lg {{ $contribution->isAccountantApproved() ? 'bg-green-50 dark:bg-green-900/20' : ($contribution->isAdminApproved() ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-50 dark:bg-gray-700/30') }}">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center {{ $contribution->isAccountantApproved() ? 'bg-green-500' : ($contribution->isAdminApproved() ? 'bg-yellow-500' : 'bg-gray-400') }} text-white text-sm font-bold">
+                                    @if($contribution->isAccountantApproved()) ✓ @else 2 @endif
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">Accountant Approval</p>
+                                    @if($contribution->isAccountantApproved())
+                                        <p class="text-sm text-green-600 dark:text-green-400">
+                                            Approved by <strong>{{ $contribution->accountantApprover->name }}</strong>
+                                            on {{ $contribution->accountant_approved_at->format('d M Y, h:i A') }}
+                                        </p>
+                                    @elseif($contribution->isAdminApproved())
+                                        <p class="text-sm text-yellow-600 dark:text-yellow-400">Waiting for accountant approval</p>
+                                    @else
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Locked - Admin approval needed first</p>
+                                    @endif
+                                </div>
                             </div>
                         </div>
+
                         @if($contribution->rejection_reason)
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Rejection Reason</label>
@@ -104,14 +136,31 @@
                     @if($contribution->status === 'pending')
                     <div class="border-t dark:border-gray-700 pt-6 mt-6">
                         <div class="flex flex-wrap gap-3">
-                            @can('approve contributions')
-                            <form action="{{ route('contributions.approve', $contribution) }}" method="POST" class="inline">
+                            {{-- Admin Approve Button --}}
+                            @if(auth()->user()->hasRole(['admin', 'super-admin']) && !$contribution->isAdminApproved())
+                            <form action="{{ route('contributions.admin-approve', $contribution) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                    Approve
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Admin Approve
                                 </button>
                             </form>
+                            @endif
 
+                            {{-- Accountant Approve Button --}}
+                            @if(auth()->user()->hasRole(['accountant', 'super-admin']) && $contribution->isAdminApproved() && !$contribution->isAccountantApproved())
+                            <form action="{{ route('contributions.accountant-approve', $contribution) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                    Final Approve (Accountant)
+                                </button>
+                            </form>
+                            @elseif(auth()->user()->hasRole(['accountant']) && !$contribution->isAdminApproved())
+                            <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50" title="Admin approval needed first">
+                                Final Approve (Locked)
+                            </button>
+                            @endif
+
+                            @can('reject contributions')
                             <button onclick="document.getElementById('reject-modal').classList.remove('hidden')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                                 Reject
                             </button>

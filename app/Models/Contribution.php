@@ -24,6 +24,10 @@ class Contribution extends Model
         'approved_by',
         'approved_at',
         'rejection_reason',
+        'admin_approved_by',
+        'admin_approved_at',
+        'accountant_approved_by',
+        'accountant_approved_at',
     ];
 
     protected function casts(): array
@@ -32,6 +36,8 @@ class Contribution extends Model
             'amount' => 'decimal:2',
             'is_late' => 'boolean',
             'approved_at' => 'datetime',
+            'admin_approved_at' => 'datetime',
+            'accountant_approved_at' => 'datetime',
         ];
     }
 
@@ -57,6 +63,38 @@ class Contribution extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Admin who approved this contribution
+     */
+    public function adminApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_approved_by');
+    }
+
+    /**
+     * Accountant who approved this contribution
+     */
+    public function accountantApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'accountant_approved_by');
+    }
+
+    /**
+     * Check if admin has approved
+     */
+    public function isAdminApproved(): bool
+    {
+        return $this->admin_approved_by !== null;
+    }
+
+    /**
+     * Check if accountant has approved
+     */
+    public function isAccountantApproved(): bool
+    {
+        return $this->accountant_approved_by !== null;
     }
 
     /**

@@ -18,7 +18,7 @@ class ContributionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Contribution::with(['user', 'submitter', 'approver']);
+        $query = Contribution::with(['user', 'submitter', 'approver', 'adminApprover', 'accountantApprover']);
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
@@ -47,7 +47,7 @@ class ContributionController extends Controller
      */
     public function pending()
     {
-        $contributions = Contribution::with(['user', 'submitter'])
+        $contributions = Contribution::with(['user', 'submitter', 'adminApprover', 'accountantApprover'])
             ->pending()
             ->latest()
             ->paginate(15);
@@ -148,6 +148,17 @@ class ContributionController extends Controller
             'is_late' => $isLate,
         ]);
 
+        // Send email notification to admins and accountants
+        try {
+            $contribution->load('user', 'submitter');
+            $notifyUsers = User::role(['admin', 'super-admin', 'accountant'])->get();
+            foreach ($notifyUsers as $notifyUser) {
+                Mail::to($notifyUser->email)->send(new \App\Mail\ContributionSubmittedMail($contribution, $notifyUser));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send contribution notification email: ' . $e->getMessage());
+        }
+
         return redirect()->route('contributions.index')
             ->with('success', 'Contribution submitted successfully! Awaiting approval.');
     }
@@ -157,7 +168,7 @@ class ContributionController extends Controller
      */
     public function show(Contribution $contribution)
     {
-        $contribution->load(['user', 'submitter', 'approver']);
+        $contribution->load(['user', 'submitter', 'approver', 'adminApprover', 'accountantApprover']);
         return view('contributions.show', compact('contribution'));
     }
 
@@ -215,21 +226,71 @@ class ContributionController extends Controller
     }
 
     /**
-     * Approve a contribution
+     * Admin approves a contribution (Step 1)
      */
-    public function approve(Contribution $contribution)
+    public function adminApprove(Contribution $contribution)
     {
-        if (!auth()->user()->can('approve contributions')) {
-            return back()->with('error', 'You are not authorized to approve contributions.');
+        $user = auth()->user();
+        
+        if (!$user->hasRole(['admin', 'super-admin'])) {
+            return back()->with('error', 'Only admins can perform this approval.');
         }
 
         if ($contribution->status !== 'pending') {
             return back()->with('error', 'Only pending contributions can be approved.');
         }
 
+        if ($contribution->isAdminApproved()) {
+            return back()->with('error', 'Admin has already approved this contribution.');
+        }
+
         $contribution->update([
+            'admin_approved_by' => $user->id,
+            'admin_approved_at' => now(),
+        ]);
+
+        // Notify accountants that admin approved - they can now approve
+        try {
+            $accountants = User::role(['accountant'])->get();
+            foreach ($accountants as $accountant) {
+                Mail::to($accountant->email)->send(new \App\Mail\AdminApprovedContributionMail($contribution, $accountant, $user));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send admin approval notification: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Admin approval given! Waiting for accountant approval.');
+    }
+
+    /**
+     * Accountant approves a contribution (Step 2 - Final)
+     */
+    public function accountantApprove(Contribution $contribution)
+    {
+        $user = auth()->user();
+        
+        if (!$user->hasRole(['accountant', 'super-admin'])) {
+            return back()->with('error', 'Only accountants can perform this approval.');
+        }
+
+        if ($contribution->status !== 'pending') {
+            return back()->with('error', 'Only pending contributions can be approved.');
+        }
+
+        if (!$contribution->isAdminApproved()) {
+            return back()->with('error', 'Admin must approve first before accountant can approve.');
+        }
+
+        if ($contribution->isAccountantApproved()) {
+            return back()->with('error', 'Accountant has already approved this contribution.');
+        }
+
+        // Final approval
+        $contribution->update([
+            'accountant_approved_by' => $user->id,
+            'accountant_approved_at' => now(),
             'status' => 'approved',
-            'approved_by' => auth()->id(),
+            'approved_by' => $user->id,
             'approved_at' => now(),
         ]);
 
@@ -237,7 +298,7 @@ class ContributionController extends Controller
         $settings = MonthlySetting::getSettings();
         $settings->updateBalance($contribution->amount, 'add');
 
-        // Send payment approved email
+        // Send final approval email to member
         try {
             $contribution->load('user');
             Mail::to($contribution->user->email)->send(new PaymentApprovedMail($contribution->user, $contribution));
@@ -245,7 +306,25 @@ class ContributionController extends Controller
             \Log::error('Failed to send payment approved email: ' . $e->getMessage());
         }
 
-        return back()->with('success', 'Contribution approved successfully!');
+        return back()->with('success', 'Contribution fully approved! Balance updated.');
+    }
+
+    /**
+     * Legacy approve method - redirects based on role
+     */
+    public function approve(Contribution $contribution)
+    {
+        $user = auth()->user();
+        
+        if ($user->hasRole(['admin', 'super-admin']) && !$contribution->isAdminApproved()) {
+            return $this->adminApprove($contribution);
+        }
+        
+        if ($user->hasRole(['accountant', 'super-admin']) && $contribution->isAdminApproved()) {
+            return $this->accountantApprove($contribution);
+        }
+
+        return back()->with('error', 'You cannot approve this contribution at this stage.');
     }
 
     /**
