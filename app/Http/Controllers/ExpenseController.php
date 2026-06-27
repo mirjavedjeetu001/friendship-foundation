@@ -197,24 +197,9 @@ class ExpenseController extends Controller
             ]);
         }
 
-        // For manual adjustment expenses, deduct from bank balance immediately
-        // regardless of payment type, since manual means money already spent from fund
-        if ($request->fund_source === 'manual') {
-            $settings = MonthlySetting::getSettings();
-            $settings->updateBalance($expense->amount, 'subtract');
-
-            // Mark as settled since manual adjustment is immediate
-            $expense->update([
-                'settlement_status' => 'not_applicable',
-                'settled_by' => Auth::id(),
-                'settled_at' => now(),
-                'settlement_note' => 'Manual adjustment - auto settled on approval',
-            ]);
-        }
-
         $message = 'Expense approved successfully.';
         if ($request->fund_source === 'manual') {
-            $message .= ' Manual adjustment - bank balance updated.';
+            $message .= ' Manual adjustment - recorded only, no balance change.';
         } elseif ($expense->payment_type === 'cash') {
             $message .= ' Cash expense pending bank settlement.';
         } else {
@@ -285,20 +270,16 @@ class ExpenseController extends Controller
         $wasApproved = $expense->isApproved();
 
         // If expense was approved, reverse the bank balance for old amount
-        if ($wasApproved) {
+        // Manual adjustments don't affect bank balance, so skip reversal for those
+        if ($wasApproved && $oldFundSource !== 'manual') {
             $settings = MonthlySetting::getSettings();
-            // Reverse manual adjustment (always deducted from bank on approval)
-            if ($oldFundSource === 'manual') {
+            // Reverse bank payment
+            if ($oldPaymentType === 'bank') {
                 $settings->updateBalance($oldAmount, 'add');
-            } else {
-                // Reverse bank payment
-                if ($oldPaymentType === 'bank') {
-                    $settings->updateBalance($oldAmount, 'add');
-                }
-                // Reverse settled cash expense
-                if ($oldPaymentType === 'cash' && $oldSettlementStatus === 'settled') {
-                    $settings->updateBalance($oldAmount, 'add');
-                }
+            }
+            // Reverse settled cash expense
+            if ($oldPaymentType === 'cash' && $oldSettlementStatus === 'settled') {
+                $settings->updateBalance($oldAmount, 'add');
             }
         }
 
@@ -315,18 +296,10 @@ class ExpenseController extends Controller
         $newPaymentType = $request->payment_type;
 
         // If expense was approved, re-apply the new amount to bank balance
-        if ($wasApproved) {
+        // Manual adjustments don't affect bank balance, so skip re-apply for those
+        if ($wasApproved && $oldFundSource !== 'manual') {
             $settings = MonthlySetting::getSettings();
-            // If manual fund source, deduct from bank balance regardless of payment type
-            if ($oldFundSource === 'manual') {
-                $settings->updateBalance($newAmount, 'subtract');
-                $expense->update([
-                    'settlement_status' => 'not_applicable',
-                    'settled_by' => Auth::id(),
-                    'settled_at' => now(),
-                    'settlement_note' => 'Manual adjustment - auto settled on edit',
-                ]);
-            } elseif ($newPaymentType === 'bank') {
+            if ($newPaymentType === 'bank') {
                 // Apply new bank payment
                 $settings->updateBalance($newAmount, 'subtract');
                 $expense->update([
@@ -383,20 +356,16 @@ class ExpenseController extends Controller
         }
 
         // If expense is approved, reverse the bank balance
-        if ($expense->isApproved()) {
+        // Manual adjustments don't affect bank balance, so skip reversal for those
+        if ($expense->isApproved() && $expense->fund_source !== 'manual') {
             $settings = MonthlySetting::getSettings();
-            // Reverse manual adjustment (always deducted from bank on approval)
-            if ($expense->fund_source === 'manual') {
+            // Reverse bank payment
+            if ($expense->payment_type === 'bank') {
                 $settings->updateBalance($expense->amount, 'add');
-            } else {
-                // Reverse bank payment
-                if ($expense->payment_type === 'bank') {
-                    $settings->updateBalance($expense->amount, 'add');
-                }
-                // Reverse settled cash expense
-                if ($expense->payment_type === 'cash' && $expense->settlement_status === 'settled') {
-                    $settings->updateBalance($expense->amount, 'add');
-                }
+            }
+            // Reverse settled cash expense
+            if ($expense->payment_type === 'cash' && $expense->settlement_status === 'settled') {
+                $settings->updateBalance($expense->amount, 'add');
             }
         }
 
