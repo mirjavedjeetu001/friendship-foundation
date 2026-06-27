@@ -54,7 +54,12 @@ class DashboardController extends Controller
             ->settledFromBank()
             ->sum('amount');
 
-        $currentBalance = $totalContributions - $totalWithdrawals - $totalExpensesFromSavings;
+        // Total approved expenses from manual adjustment
+        $totalExpensesFromManual = Expense::approved()
+            ->where('fund_source', 'manual')
+            ->sum('amount');
+
+        $currentBalance = $totalContributions - $totalWithdrawals - $totalExpensesFromSavings - $totalExpensesFromManual;
 
         // Current month stats (only if program has started)
         $currentMonthContributions = 0;

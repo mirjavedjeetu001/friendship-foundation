@@ -231,17 +231,136 @@ class ExpenseController extends Controller
     }
 
     /**
-     * Delete an expense (only if pending and own expense)
+     * Show form to edit an expense
+     */
+    public function edit(Expense $expense)
+    {
+        if (!Auth::user()->hasAnyRole(['super-admin', 'admin'])) {
+            return back()->with('error', 'Only admins can edit expenses.');
+        }
+
+        return view('expenses.edit', compact('expense'));
+    }
+
+    /**
+     * Update an expense
+     */
+    public function update(Request $request, Expense $expense)
+    {
+        if (!Auth::user()->hasAnyRole(['super-admin', 'admin'])) {
+            return back()->with('error', 'Only admins can edit expenses.');
+        }
+
+        $request->validate([
+            'expense_date' => 'required|date',
+            'purpose' => 'required|string|max:255',
+            'spent_by' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:1',
+            'payment_type' => 'required|in:cash,bank',
+            'description' => 'nullable|string|max:1000',
+            'receipt' => 'nullable|image|max:5120',
+        ]);
+
+        $oldAmount = $expense->amount;
+        $oldPaymentType = $expense->payment_type;
+        $oldSettlementStatus = $expense->settlement_status;
+        $wasApproved = $expense->isApproved();
+
+        // If expense was approved and settled, reverse the bank balance for old amount
+        if ($wasApproved) {
+            $settings = MonthlySetting::getSettings();
+            // Reverse bank payment
+            if ($oldPaymentType === 'bank') {
+                $settings->updateBalance($oldAmount, 'add');
+            }
+            // Reverse settled cash expense
+            if ($oldPaymentType === 'cash' && $oldSettlementStatus === 'settled') {
+                $settings->updateBalance($oldAmount, 'add');
+            }
+        }
+
+        // Handle receipt upload
+        $receiptPath = $expense->receipt;
+        if ($request->hasFile('receipt')) {
+            if ($expense->receipt) {
+                Storage::disk('public')->delete($expense->receipt);
+            }
+            $receiptPath = $request->file('receipt')->store('receipts', 'public');
+        }
+
+        $newAmount = $request->amount;
+        $newPaymentType = $request->payment_type;
+
+        // If expense was approved, re-apply the new amount to bank balance
+        if ($wasApproved) {
+            $settings = MonthlySetting::getSettings();
+            // Apply new bank payment
+            if ($newPaymentType === 'bank') {
+                $settings->updateBalance($newAmount, 'subtract');
+                $expense->update([
+                    'settlement_status' => 'not_applicable',
+                    'settled_by' => Auth::id(),
+                    'settled_at' => now(),
+                    'settlement_note' => 'Direct bank payment - auto settled on edit',
+                ]);
+            } else {
+                // Cash payment - reset settlement to pending
+                $expense->update([
+                    'settlement_status' => 'pending',
+                    'settled_by' => null,
+                    'settled_at' => null,
+                    'settlement_note' => null,
+                ]);
+            }
+        }
+
+        $expense->update([
+            'expense_date' => $request->expense_date,
+            'purpose' => $request->purpose,
+            'spent_by' => $request->spent_by,
+            'amount' => $newAmount,
+            'payment_type' => $newPaymentType,
+            'description' => $request->description,
+            'receipt' => $receiptPath,
+        ]);
+
+        $message = 'Expense updated successfully.';
+        if ($wasApproved && $newPaymentType === 'bank') {
+            $message .= ' Bank balance adjusted.';
+        } elseif ($wasApproved && $newPaymentType === 'cash') {
+            $message .= ' Cash expense set to pending settlement.';
+        }
+
+        return redirect()->route('expenses.show', $expense)->with('success', $message);
+    }
+
+    /**
+     * Delete an expense
      */
     public function destroy(Expense $expense)
     {
-        // Only the creator can delete, and only if pending
-        if ($expense->created_by !== Auth::id() && !Auth::user()->hasAnyRole(['super-admin', 'admin'])) {
+        $isAdmin = Auth::user()->hasAnyRole(['super-admin', 'admin']);
+
+        // Only the creator can delete pending expenses, admin can delete any
+        if ($expense->created_by !== Auth::id() && !$isAdmin) {
             return back()->with('error', 'You cannot delete this expense.');
         }
 
-        if (!$expense->isPending() && !Auth::user()->hasAnyRole(['super-admin', 'admin'])) {
+        if (!$expense->isPending() && !$isAdmin) {
             return back()->with('error', 'Only pending expenses can be deleted.');
+        }
+
+        // If expense is approved, reverse the bank balance
+        if ($expense->isApproved()) {
+            $settings = MonthlySetting::getSettings();
+            // Reverse bank payment
+            if ($expense->payment_type === 'bank') {
+                $settings->updateBalance($expense->amount, 'add');
+            }
+            // Reverse settled cash expense
+            if ($expense->payment_type === 'cash' && $expense->settlement_status === 'settled') {
+                $settings->updateBalance($expense->amount, 'add');
+            }
         }
 
         // Delete receipt if exists
@@ -249,9 +368,10 @@ class ExpenseController extends Controller
             Storage::disk('public')->delete($expense->receipt);
         }
 
+        $wasApproved = $expense->isApproved();
         $expense->delete();
 
-        return back()->with('success', 'Expense deleted successfully.');
+        return back()->with('success', 'Expense deleted successfully.' . ($wasApproved ? ' Balance reversed.' : ''));
     }
 
     /**

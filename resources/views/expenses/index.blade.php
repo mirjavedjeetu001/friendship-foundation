@@ -164,7 +164,22 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
                                         </a>
-                                        @if($expense->isPending() && (auth()->id() === $expense->created_by || auth()->user()->hasAnyRole(['super-admin', 'admin'])))
+                                        @if(auth()->user()->hasAnyRole(['super-admin', 'admin']) && $expense->isApproved())
+                                            <a href="{{ route('expenses.edit', $expense) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" title="Edit">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+                                            <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this approved expense? Bank balance will be reversed.')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Delete">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @elseif($expense->isPending() && (auth()->id() === $expense->created_by || auth()->user()->hasAnyRole(['super-admin', 'admin'])))
                                             <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this expense?')">
                                                 @csrf
                                                 @method('DELETE')
@@ -227,7 +242,14 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('expenses.show', $expense) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">View</a>
-                                @if($expense->isPending() && (auth()->id() === $expense->created_by || auth()->user()->hasAnyRole(['super-admin', 'admin'])))
+                                @if(auth()->user()->hasAnyRole(['super-admin', 'admin']) && $expense->isApproved())
+                                    <a href="{{ route('expenses.edit', $expense) }}" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-medium rounded">Edit</a>
+                                    <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('Delete this approved expense? Balance will be reversed.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-2 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded">Delete</button>
+                                    </form>
+                                @elseif($expense->isPending() && (auth()->id() === $expense->created_by || auth()->user()->hasAnyRole(['super-admin', 'admin'])))
                                     <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('Delete this expense?')">
                                         @csrf
                                         @method('DELETE')

@@ -92,7 +92,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckApproved::class])->group(fu
     Route::post('/expenses/bulk-settle', [ExpenseController::class, 'bulkSettle'])
         ->name('expenses.bulk-settle')
         ->middleware('permission:approve contributions');
-    Route::resource('expenses', ExpenseController::class)->except(['edit', 'update']);
+    Route::resource('expenses', ExpenseController::class);
 
     // User management routes
     Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])
